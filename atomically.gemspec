@@ -31,6 +31,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake", "~> 12.0"
   spec.add_development_dependency "sqlite3", "~> 1.3"
   spec.add_development_dependency "minitest", "~> 5.0"
+  spec.add_development_dependency "mysql2", ">= 0.3"
 
   spec.add_dependency "activerecord-import", ">= 0.27.0"
   spec.add_dependency "activerecord", ">= 3"
