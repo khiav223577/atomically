@@ -6,12 +6,18 @@ language: ruby
 rvm:
   - 2.2
   - 2.5
+env:
+  - DB=mysql
 gemfile:
   - gemfiles/3.2.gemfile
   - gemfiles/4.2.gemfile
   - gemfiles/5.0.gemfile
   - gemfiles/5.1.gemfile
   - gemfiles/5.2.gemfile
+matrix:
+  exclude:
+    - gemfile: gemfiles/3.2.gemfile
+      rvm: 2.5
 before_install:
   - gem install bundler
   - gem update --system
@@ -19,6 +25,8 @@ before_install:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
+before_script:
+  - mysql -u root -e 'CREATE DATABASE travis_ci_test;'
 script:
   - bundle exec rake test
 after_script:
