@@ -8,14 +8,14 @@ require 'minitest/autorun'
 
 case ENV['DB']
 when 'mysql'
-  require 'mysql2_connection'
+  require 'lib/mysql2_connection'
 # when 'pg'
-#   require 'postgresql_connection'
+#   require 'lib/postgresql_connection'
 else
   raise "no database"
 end
 
-require 'seeds'
+require 'lib/seeds'
 
 def in_sandbox
   ActiveRecord::Base.transaction do
