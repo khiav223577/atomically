@@ -15,6 +15,7 @@ else
   raise "no database"
 end
 
+require 'lib/patches'
 require 'lib/seeds'
 
 def in_sandbox
