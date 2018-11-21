@@ -28,12 +28,14 @@ Or install it yourself as:
 
 ## Usage
 
-### create_or_plus(columns, values, on_duplicate_update_columns)
+### create_or_plus
 
 Import an array of records. When key is duplicate, plus the old value with new value.
+It is useful to add `items` to user when `user_items` may not exist.
 
-It take three
 First two args (columns, values) are the same with the [import](https://github.com/zdennis/activerecord-import#columns-and-arrays) method.
+
+Example:
 
 ```rb
 columns = [:user_id, :item_id, :count]
@@ -45,7 +47,7 @@ UserItem.atomically.create_or_plus(columns, values, on_duplicate_update_columns)
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test DB=mysql` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
