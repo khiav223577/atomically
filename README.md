@@ -28,6 +28,21 @@ Or install it yourself as:
 
 ## Usage
 
+### create_or_plus(columns, values, on_duplicate_update_columns)
+
+Import an array of records. When key is duplicate, plus the old value with new value.
+
+It take three
+First two args (columns, values) are the same with the [import](https://github.com/zdennis/activerecord-import#columns-and-arrays) method.
+
+```rb
+columns = [:user_id, :item_id, :count]
+values = [[user.id, item1.id, 3], [user.id, item2.id, 2]]
+on_duplicate_update_columns = [:count]
+
+UserItem.atomically.create_or_plus(columns, values, on_duplicate_update_columns)
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
