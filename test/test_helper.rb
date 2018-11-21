@@ -16,3 +16,10 @@ else
 end
 
 require 'seeds'
+
+def in_sandbox
+  ActiveRecord::Base.transaction do
+    yield
+    raise ActiveRecord::Rollback
+  end
+end
