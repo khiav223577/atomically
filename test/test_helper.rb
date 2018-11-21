@@ -6,8 +6,13 @@ require 'atomically'
 
 require 'minitest/autorun'
 
-ActiveRecord::Base.establish_connection(
-  'adapter'  => 'sqlite3',
-  'database' => ':memory:',
-)
+case ENV['DB']
+when 'mysql'
+  require 'mysql2_connection'
+# when 'pg'
+#   require 'postgresql_connection'
+else
+  raise "no database"
+end
+
 require 'seeds'
