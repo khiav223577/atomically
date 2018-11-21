@@ -1,5 +1,5 @@
 require 'atomically/version'
-require 'active_record'
+require 'atomically/active_record/extension'
 
 module Atomically
 end
