@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'activerecord-import'
 
 class Atomically::QueryService
@@ -12,10 +14,10 @@ class Atomically::QueryService
   private
 
   def on_duplicate_key_plus_sql( columns)
-    columns.lazy
-           .map(&@klass.connection.method(:quote_column_name))
-           .map{|s| "#{s} = #{s} + VALUES(#{s})" }
-           .force
-           .join(', ')
+    columns.lazy.map(&method(:quote_column)).map{|s| "#{s} = #{s} + VALUES(#{s})" }.force.join(', ')
+  end
+
+  def quote_column(column)
+    @klass.connection.quote_column_name(column)
   end
 end
