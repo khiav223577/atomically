@@ -3,7 +3,7 @@ require 'atomically/query_service'
 
 class ActiveRecord::Relation
   def atomically
-    Atomically::QueryService.new(klass)
+    Atomically::QueryService.new(klass, relation: self)
   end
 end
 
