@@ -4,8 +4,9 @@ require 'activerecord-import'
 require 'rails_or'
 
 class Atomically::QueryService
-  def initialize(klass)
+  def initialize(klass, relation: nil)
     @klass = klass
+    @relation = relation || @klass
   end
 
   def create_or_plus(columns, data, update_columns)
@@ -18,14 +19,14 @@ class Atomically::QueryService
     update_columns = update_columns.map(&method(:quote_column))
 
     query = hash.inject(@klass.none) do |relation, (id, pay_count)|
-      condition = @klass.where(primary_key => id)
+      condition = @relation.where(primary_key => id)
       update_columns.each{|s| condition = condition.where("#{s} >= ?", pay_count) }
       next relation.or(condition)
     end
 
     raw_when_sql = hash.map{|id, pay_count| "WHEN #{sanitize(id)} THEN #{sanitize(-pay_count)}" }.join("\n")
     update_sqls = update_columns.map.with_index do |column, idx|
-      value = idx == 0 ? "(@change := \nCASE #{column}\n#{raw_when_sql}\nEND)" : '@change'
+      value = idx == 0 ? "(@change := \nCASE #{quote_column(primary_key)}\n#{raw_when_sql}\nEND)" : '@change'
       next "#{column} = #{column} + #{value}"
     end
 
