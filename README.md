@@ -31,18 +31,26 @@ Or install it yourself as:
 ### create_or_plus
 
 Import an array of records. When key is duplicate, plus the old value with new value.
-It is useful to add `items` to user when `user_items` may not exist.
+It is useful to add `items` to `user` when `user_items` may not exist.
 
 First two args (columns, values) are the same with the [import](https://github.com/zdennis/activerecord-import#columns-and-arrays) method.
 
 Example:
-
 ```rb
-columns = [:user_id, :item_id, :count]
+columns = [:user_id, :item_id, :quantity]
 values = [[user.id, item1.id, 3], [user.id, item2.id, 2]]
-on_duplicate_update_columns = [:count]
+on_duplicate_update_columns = [:quantity]
 
 UserItem.atomically.create_or_plus(columns, values, on_duplicate_update_columns)
+```
+
+### pay_all
+Reduce the quantity of items and return how many rows and updated if all of them is enough.
+Do nothing and return zero if any of them is not enough.
+
+Example:
+```rb
+user.user_items.atomically.pay_all({ item1.id => 4, item2.id => 3 }, [:quantity], primary_key: :item_id)
 ```
 
 ## Development
