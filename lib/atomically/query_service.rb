@@ -3,6 +3,7 @@
 require 'activerecord-import'
 require 'rails_or'
 require 'atomically/patches/none' if not ActiveRecord::Base.respond_to?(:none)
+require 'atomically/patches/from' if Gem::Version.new(ActiveRecord::VERSION::STRING) < Gem::Version.new('4.0.0')
 
 class Atomically::QueryService
   def initialize(klass, relation: nil)
