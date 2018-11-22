@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'activerecord-import'
+require 'rails_or'
 
 class Atomically::QueryService
   def initialize(klass)
@@ -11,6 +12,27 @@ class Atomically::QueryService
     @klass.import(columns, data, on_duplicate_key_update: on_duplicate_key_plus_sql(update_columns))
   end
 
+  def pay_all(update_columns, hash, primary_key: :id) # { id => pay_count }
+    return 0 if hash.blank?
+
+    update_columns = update_columns.map(&method(:quote_column))
+
+    query = hash.inject(@klass.none) do |relation, (id, pay_count)|
+      condition = @klass.where(primary_key => id)
+      update_columns.each{|s| condition = condition.where("#{s} >= ?", pay_count) }
+      next relation.or(condition)
+    end
+
+    raw_when_sql = hash.map{|id, pay_count| "WHEN #{sanitize(id)} THEN #{sanitize(-pay_count)}" }.join("\n")
+    update_sqls = update_columns.map.with_index do |column, idx|
+      value = idx == 0 ? "(@change := \nCASE #{column}\n#{raw_when_sql}\nEND)" : '@change'
+      next "#{column} = #{column} + #{value}"
+    end
+
+    return query.where("(#{@klass.from(query).select('COUNT(*)').to_sql}) = ?", hash.size)
+                .update_all(update_sqls.join(', '))
+  end
+
   private
 
   def on_duplicate_key_plus_sql( columns)
@@ -19,5 +41,9 @@ class Atomically::QueryService
 
   def quote_column(column)
     @klass.connection.quote_column_name(column)
+  end
+
+  def sanitize(*args)
+    @klass.sanitize(*args)
   end
 end
