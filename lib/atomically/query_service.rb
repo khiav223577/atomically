@@ -13,7 +13,7 @@ class Atomically::QueryService
     @klass.import(columns, data, on_duplicate_key_update: on_duplicate_key_plus_sql(update_columns))
   end
 
-  def pay_all(update_columns, hash, primary_key: :id) # { id => pay_count }
+  def pay_all(hash, update_columns, primary_key: :id) # { id => pay_count }
     return 0 if hash.blank?
 
     update_columns = update_columns.map(&method(:quote_column))
