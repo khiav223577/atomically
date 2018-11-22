@@ -44,7 +44,7 @@ class Atomically::QueryService
     @klass.connection.quote_column_name(column)
   end
 
-  def sanitize(*args)
-    @klass.sanitize(*args)
+  def sanitize(value)
+    @klass.connection.quote(value)
   end
 end
