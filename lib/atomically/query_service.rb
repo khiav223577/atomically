@@ -2,6 +2,7 @@
 
 require 'activerecord-import'
 require 'rails_or'
+require 'atomically/patches/none' if not ActiveRecord::Base.respond_to?(:none)
 
 class Atomically::QueryService
   def initialize(klass, relation: nil)
