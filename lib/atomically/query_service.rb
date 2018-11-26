@@ -38,6 +38,14 @@ class Atomically::QueryService
                 .update_all(update_sqls.join(', '))
   end
 
+  def update(attrs, from: :not_set)
+    open_update_all_scope do
+      attrs.each do |column, value|
+        where(column => (from == :not_set ? @model[column] : from)).update(column => value)
+      end
+    end
+  end
+
   private
 
   def on_duplicate_key_plus_sql( columns)
