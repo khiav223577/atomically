@@ -59,8 +59,10 @@ class Atomically::QueryService
   def update_and_return_number_of_updated_rows(attrs, from: :not_set)
     model = @model
     return open_update_all_scope do
+      update(updated_at: Time.now)
       attrs.each do |column, value|
-        where(column => (from == :not_set ? model[column] : from)).update(column => value)
+        old_value = (from == :not_set ? model[column] : from)
+        where(column => old_value).update(column => value) if old_value != value
       end
     end
   end

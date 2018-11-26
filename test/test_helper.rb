@@ -17,6 +17,7 @@ end
 
 require 'lib/patches'
 require 'lib/seeds'
+require 'timecop'
 
 def in_sandbox
   ActiveRecord::Base.transaction do
