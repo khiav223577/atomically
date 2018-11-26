@@ -39,11 +39,7 @@ class Atomically::QueryService
   end
 
   def update(attrs, from: :not_set)
-    open_update_all_scope do
-      attrs.each do |column, value|
-        where(column => (from == :not_set ? @model[column] : from)).update(column => value)
-      end
-    end
+    update_and_return_number_of_updated_rows(attrs, from: from) == 1
   end
 
   private
@@ -58,6 +54,15 @@ class Atomically::QueryService
 
   def sanitize(value)
     @klass.connection.quote(value)
+  end
+
+  def update_and_return_number_of_updated_rows(attrs, from: :not_set)
+    model = @model
+    return open_update_all_scope do
+      attrs.each do |column, value|
+        where(column => (from == :not_set ? model[column] : from)).update(column => value)
+      end
+    end
   end
 
   def open_update_all_scope(&block)
