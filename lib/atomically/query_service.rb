@@ -39,7 +39,7 @@ class Atomically::QueryService
   end
 
   def update(attrs, from: :not_set)
-    update_and_return_number_of_updated_rows(attrs, from: from) == 1
+    update_and_return_number_of_updated_rows(attrs, from) == 1
   end
 
   private
@@ -56,7 +56,7 @@ class Atomically::QueryService
     @klass.connection.quote(value)
   end
 
-  def update_and_return_number_of_updated_rows(attrs, from: :not_set)
+  def update_and_return_number_of_updated_rows(attrs, from)
     model = @model
     return open_update_all_scope do
       update(updated_at: Time.now)

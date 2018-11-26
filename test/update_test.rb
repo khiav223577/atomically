@@ -29,4 +29,16 @@ class UpdateTest < Minitest::Test
       end
     end
   end
+
+  def test_update_attribute_with_custom_from
+    in_sandbox do
+      Timecop.freeze(@future) do
+        assert_equal false, @item.atomically.update({ name: 'bomb2' }, { from: 'water gun' })
+
+        new_item = Item.find_by(id: @item.id)
+        assert_equal 'bomb', new_item.name
+        assert_equal @item.updated_at, new_item.updated_at
+      end
+    end
+  end
 end
