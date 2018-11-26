@@ -37,12 +37,25 @@ First two args (columns, values) are the same with the [import](https://github.c
 
 Example:
 ```rb
+user = User.find(2)
+item1 = Item.find(1)
+item2 = Item.find(2)
+```
+
+```rb
 columns = [:user_id, :item_id, :quantity]
 values = [[user.id, item1.id, 3], [user.id, item2.id, 2]]
 on_duplicate_update_columns = [:quantity]
 
 UserItem.atomically.create_or_plus(columns, values, on_duplicate_update_columns)
 ```
+
+#### before
+![before](https://user-images.githubusercontent.com/4011729/48998921-ff430600-f18f-11e8-8eeb-e8a71bbf5802.png)
+
+#### after
+![image](https://user-images.githubusercontent.com/4011729/48999092-8d1ef100-f190-11e8-8372-86e2e99cbe08.png)
+
 
 ### pay_all
 Reduce the quantity of items and return how many rows and updated if all of them is enough.
