@@ -2,13 +2,15 @@
 
 require 'activerecord-import'
 require 'rails_or'
+require 'atomically/update_all_scope'
 require 'atomically/patches/none' if not ActiveRecord::Base.respond_to?(:none)
 require 'atomically/patches/from' if Gem::Version.new(ActiveRecord::VERSION::STRING) < Gem::Version.new('4.0.0')
 
 class Atomically::QueryService
-  def initialize(klass, relation: nil)
+  def initialize(klass, relation: nil, model: nil, &block)
     @klass = klass
     @relation = relation || @klass
+    @model = model
   end
 
   def create_or_plus(columns, data, update_columns)
@@ -48,5 +50,12 @@ class Atomically::QueryService
 
   def sanitize(value)
     @klass.connection.quote(value)
+  end
+
+  def open_update_all_scope(&block)
+    return 0 if @model == nil
+    scope = UpdateAllScope.new(model: @model)
+    scope.instance_exec(&block)
+    return scope.do_query!
   end
 end
