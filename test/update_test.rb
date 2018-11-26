@@ -9,10 +9,11 @@ class UpdateTest < Minitest::Test
   def test_update_attribute
     in_sandbox do
       Timecop.freeze(@future) do
-        assert_equal true, @item.atomically.update(name: 'bomb2')
+        assert_equal true, @item.atomically.update(name: 'unknown')
 
         new_item = Item.find_by(id: @item.id)
-        assert_equal 'bomb2', new_item.name
+        assert_equal 'unknown', new_item.name
+        assert_equal 'An explosive weapon.', new_item.desc
         assert_equal @future, new_item.updated_at
       end
     end
@@ -25,6 +26,7 @@ class UpdateTest < Minitest::Test
 
         new_item = Item.find_by(id: @item.id)
         assert_equal 'bomb', new_item.name
+        assert_equal 'An explosive weapon.', new_item.desc
         assert_equal @future, new_item.updated_at
       end
     end
@@ -33,11 +35,25 @@ class UpdateTest < Minitest::Test
   def test_update_attribute_with_custom_from
     in_sandbox do
       Timecop.freeze(@future) do
-        assert_equal false, @item.atomically.update({ name: 'bomb2' }, { from: 'water gun' })
+        assert_equal false, @item.atomically.update({ name: 'unknown' }, { from: 'water gun' })
 
         new_item = Item.find_by(id: @item.id)
         assert_equal 'bomb', new_item.name
+        assert_equal 'An explosive weapon.', new_item.desc
         assert_equal @item.updated_at, new_item.updated_at
+      end
+    end
+  end
+
+  def test_update_multiple_attributes
+    in_sandbox do
+      Timecop.freeze(@future) do
+        assert_equal true, @item.atomically.update(name: 'unknown', desc: 'no description')
+
+        new_item = Item.find_by(id: @item.id)
+        assert_equal 'unknown', new_item.name
+        assert_equal 'no description', new_item.desc
+        assert_equal @future, new_item.updated_at
       end
     end
   end
