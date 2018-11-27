@@ -7,7 +7,7 @@ require 'atomically/patches/none' if not ActiveRecord::Base.respond_to?(:none)
 require 'atomically/patches/from' if Gem::Version.new(ActiveRecord::VERSION::STRING) < Gem::Version.new('4.0.0')
 
 class Atomically::QueryService
-  def initialize(klass, relation: nil, model: nil, &block)
+  def initialize(klass, relation: nil, model: nil)
     @klass = klass
     @relation = relation || @klass
     @model = model
@@ -46,7 +46,7 @@ class Atomically::QueryService
 
   private
 
-  def on_duplicate_key_plus_sql( columns)
+  def on_duplicate_key_plus_sql(columns)
     columns.lazy.map(&method(:quote_column)).map{|s| "#{s} = #{s} + VALUES(#{s})" }.force.join(', ')
   end
 

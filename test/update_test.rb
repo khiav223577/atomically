@@ -55,7 +55,7 @@ class UpdateTest < Minitest::Test
   def test_update_attribute_with_custom_from
     in_sandbox do
       Timecop.freeze(@future) do
-        assert_equal false, @item.atomically.update({ name: 'unknown' }, { from: 'super bomb' })
+        assert_equal false, @item.atomically.update({ name: 'unknown' }, from: 'super bomb')
 
         new_item = Item.find_by(id: @item.id)
         assert_equal 'bomb', @item.name
@@ -71,7 +71,7 @@ class UpdateTest < Minitest::Test
     in_sandbox do
       Timecop.freeze(@future) do
         assert_equal 1, Item.where(id: @item.id).update_all(name: 'super bomb')
-        assert_equal true, @item.atomically.update({ name: 'unknown' }, { from: 'super bomb' })
+        assert_equal true, @item.atomically.update({ name: 'unknown' }, from: 'super bomb')
 
         new_item = Item.find_by(id: @item.id)
         assert_equal 'unknown', @item.name
