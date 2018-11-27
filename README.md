@@ -1,7 +1,7 @@
 # Atomically
 
 [![Gem Version](https://img.shields.io/gem/v/atomically.svg?style=flat)](https://rubygems.org/gems/atomically)
-[![Build Status](https://api.travis-ci.com/khiav223577/atomically.svg?branch=master)
+[![Build Status](https://api.travis-ci.com/khiav223577/atomically.svg?branch=master)](https://travis-ci.com/khiav223577/atomically)
 [![RubyGems](http://img.shields.io/gem/dt/atomically.svg?style=flat)](https://rubygems.org/gems/atomically)
 [![Code Climate](https://codeclimate.com/github/khiav223577/atomically/badges/gpa.svg)](https://codeclimate.com/github/khiav223577/atomically)
 [![Test Coverage](https://codeclimate.com/github/khiav223577/atomically/badges/coverage.svg)](https://codeclimate.com/github/khiav223577/atomically/coverage)
