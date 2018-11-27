@@ -12,7 +12,9 @@ class UpdateTest < Minitest::Test
         assert_equal true, @item.atomically.update(name: 'unknown')
 
         new_item = Item.find_by(id: @item.id)
+        assert_equal 'unknown', @item.name
         assert_equal 'unknown', new_item.name
+        assert_equal 'An explosive weapon.', @item.desc
         assert_equal 'An explosive weapon.', new_item.desc
         assert_in_delta @item.updated_at, new_item.updated_at, 1.day
       end
@@ -26,7 +28,9 @@ class UpdateTest < Minitest::Test
         assert_equal false, @item.atomically.update(name: 'unknown')
 
         new_item = Item.find_by(id: @item.id)
+        assert_equal 'bomb', @item.name
         assert_equal 'super bomb', new_item.name
+        assert_equal 'An explosive weapon.', @item.desc
         assert_equal 'An explosive weapon.', new_item.desc
         assert_in_delta @item.updated_at, new_item.updated_at, 0.day
       end
@@ -39,7 +43,9 @@ class UpdateTest < Minitest::Test
         assert_equal true, @item.atomically.update(name: 'bomb')
 
         new_item = Item.find_by(id: @item.id)
+        assert_equal 'bomb', @item.name
         assert_equal 'bomb', new_item.name
+        assert_equal 'An explosive weapon.', @item.desc
         assert_equal 'An explosive weapon.', new_item.desc
         assert_in_delta @item.updated_at, new_item.updated_at, 1.day
       end
@@ -52,7 +58,9 @@ class UpdateTest < Minitest::Test
         assert_equal false, @item.atomically.update({ name: 'unknown' }, { from: 'super bomb' })
 
         new_item = Item.find_by(id: @item.id)
+        assert_equal 'bomb', @item.name
         assert_equal 'bomb', new_item.name
+        assert_equal 'An explosive weapon.', @item.desc
         assert_equal 'An explosive weapon.', new_item.desc
         assert_in_delta @item.updated_at, new_item.updated_at, 0.day
       end
@@ -66,7 +74,9 @@ class UpdateTest < Minitest::Test
         assert_equal true, @item.atomically.update({ name: 'unknown' }, { from: 'super bomb' })
 
         new_item = Item.find_by(id: @item.id)
+        assert_equal 'unknown', @item.name
         assert_equal 'unknown', new_item.name
+        assert_equal 'An explosive weapon.', @item.desc
         assert_equal 'An explosive weapon.', new_item.desc
         assert_in_delta @item.updated_at, new_item.updated_at, 1.day
       end
@@ -79,7 +89,9 @@ class UpdateTest < Minitest::Test
         assert_equal true, @item.atomically.update(name: 'unknown', desc: 'no description')
 
         new_item = Item.find_by(id: @item.id)
+        assert_equal 'unknown', @item.name
         assert_equal 'unknown', new_item.name
+        assert_equal 'no description', @item.desc
         assert_equal 'no description', new_item.desc
         assert_in_delta @item.updated_at, new_item.updated_at, 1.day
       end

@@ -19,7 +19,6 @@ class UpdateAllScope
 
   def do_query!
     return 0 if @queries.empty?
-
     return @relation.update_all(@queries.join(','))
   end
 

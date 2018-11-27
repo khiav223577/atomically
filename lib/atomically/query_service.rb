@@ -39,7 +39,9 @@ class Atomically::QueryService
   end
 
   def update(attrs, from: :not_set)
-    update_and_return_number_of_updated_rows(attrs, from) == 1
+    success = update_and_return_number_of_updated_rows(attrs, from) == 1
+    assign_without_changes(attrs) if success
+    return success
   end
 
   private
@@ -72,5 +74,10 @@ class Atomically::QueryService
     scope = UpdateAllScope.new(model: @model)
     scope.instance_exec(&block)
     return scope.do_query!
+  end
+
+  def assign_without_changes(attributes)
+    @model.assign_attributes(attributes)
+    @model.send(:clear_attribute_changes, attributes.keys)
   end
 end
