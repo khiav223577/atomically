@@ -3,7 +3,7 @@
 require 'activerecord-import'
 require 'rails_or'
 require 'atomically/update_all_scope'
-require 'atomically/patches/clear_attribute_changes' if not ActiveRecord::Base.private_method_defined?(:clear_attribute_changes)
+require 'atomically/patches/clear_attribute_changes' if not ActiveModel::Dirty.method_defined?(:clear_attribute_changes) and not ActiveModel::Dirty.private_method_defined?(:clear_attribute_changes)
 require 'atomically/patches/none' if not ActiveRecord::Base.respond_to?(:none)
 require 'atomically/patches/from' if Gem::Version.new(ActiveRecord::VERSION::STRING) < Gem::Version.new('4.0.0')
 
