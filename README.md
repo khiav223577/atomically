@@ -58,12 +58,39 @@ UserItem.atomically.create_or_plus(columns, values, on_duplicate_update_columns)
 
 
 ### pay_all
+
 Reduce the quantity of items and return how many rows and updated if all of them is enough.
 Do nothing and return zero if any of them is not enough.
 
 Example:
 ```rb
 user.user_items.atomically.pay_all({ item1.id => 4, item2.id => 3 }, [:quantity], primary_key: :item_id)
+```
+
+### update
+
+Updates the attributes of the model from the passed-in hash and saves the record. The difference between this method and [ActiveRecord#update](https://apidock.com/rails/ActiveRecord/Persistence/update) is that it will add extra WHERE conditions to prevent race condition.
+
+Example:
+```rb
+class Arena < ApplicationRecord
+  def atomically_close!
+    atomically.update(closed_at: Time.now)
+  end
+
+  def close!
+    update(closed_at: Time.now)
+  end
+end
+```
+```sql
+# arena.atomically_close!
+UPDATE `arenas` SET `arenas`.`closed_at` = '2018-11-27 03:44:25', `updated_at` = '2018-11-27 03:44:25'
+WHERE `arenas`.`id` = 1752 AND `arenas`.`closed_at` IS NULL
+
+# arena.close!
+UPDATE `arenas` SET `arenas`.`closed_at` = '2018-11-27 03:44:25', `updated_at` = '2018-11-27 03:44:25'
+WHERE `arenas`.`id` = 1752
 ```
 
 ## Development

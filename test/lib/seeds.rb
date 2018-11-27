@@ -20,6 +20,7 @@ ActiveRecord::Schema.define do
 
   create_table :items, force: true do |t|
     t.string :name, null: false
+    t.string :desc, null: false, default: ''
     t.timestamps null: false
   end
 end
@@ -33,8 +34,8 @@ users = User.create([
 ])
 
 items = Item.create([
-  { name: 'bomb' },
-  { name: 'water gun' },
+  { name: 'bomb', desc: 'An explosive weapon.' },
+  { name: 'water gun', desc: 'A type of toy gun designed to shoot water.' },
   { name: 'flame thrower' },
 ])
 

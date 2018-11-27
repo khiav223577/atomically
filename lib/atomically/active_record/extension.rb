@@ -13,4 +13,8 @@ class ActiveRecord::Base
   def self.atomically
     Atomically::QueryService.new(self)
   end
+
+  def atomically
+    Atomically::QueryService.new(self.class, model: self)
+  end
 end
