@@ -14,7 +14,7 @@ when 'mysql'
 # when 'pg'
 #   require 'lib/postgresql_connection'
 else
-  raise "no database"
+  fail 'no database'
 end
 
 require 'lib/patches'
@@ -24,6 +24,6 @@ require 'timecop'
 def in_sandbox
   ActiveRecord::Base.transaction do
     yield
-    raise ActiveRecord::Rollback
+    fail ActiveRecord::Rollback
   end
 end

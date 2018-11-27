@@ -2,7 +2,7 @@ module ActiveModel
   module Dirty
     private
 
-    alias_method :attributes_changed_by_setter, :changed_attributes # :nodoc:
+    alias attributes_changed_by_setter changed_attributes # :nodoc:
 
     # Force an attribute to have a particular "before" value
     def set_attribute_was(attr, old_value)
