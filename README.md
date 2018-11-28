@@ -67,6 +67,23 @@ Example:
 user.user_items.atomically.pay_all({ item1.id => 4, item2.id => 3 }, [:quantity], primary_key: :item_id)
 ```
 
+### update_all _(expected_number, updates)_
+
+Behaves like [ActiveRecord::Relation#update_all](https://apidock.com/rails/ActiveRecord/Relation/update_all) but add an additional constrain that the number of affected rows equals to what you specify.
+
+#### Parameters
+ - `expected_number` - The number of rows that you expect to be updated.
+ - `updates` - A string, array, or hash representing the SET part of an SQL statement.
+
+#### Examples
+```rb
+User.where(id: [1, 2]).atomically.update_all(2, name: '')
+# => 2
+
+User.where(id: [1, 2, 3]).atomically.update_all(2, name: '')
+# => 0
+```
+
 ### update
 
 Updates the attributes of the model from the passed-in hash and saves the record. The difference between this method and [ActiveRecord#update](https://apidock.com/rails/ActiveRecord/Persistence/update) is that it will add extra WHERE conditions to prevent race condition.
