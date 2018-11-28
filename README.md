@@ -28,14 +28,17 @@ Or install it yourself as:
 
 ## Usage
 
-### create_or_plus
+### create_or_plus _(columns, values, on_duplicate_update_columns)_
 
 Import an array of records. When key is duplicate, plus the old value with new value.
 It is useful to add `items` to `user` when `user_items` may not exist.
 
-First two args (columns, values) are the same with the [import](https://github.com/zdennis/activerecord-import#columns-and-arrays) method.
+#### Parameters
 
-Example:
+  - First two args (`columns`, `values`) are the same with the [import](https://github.com/zdennis/activerecord-import#columns-and-arrays) method.
+  - `on_duplicate_update_columns` - The column that will be updated on duplicate.
+
+#### Example
 ```rb
 user = User.find(2)
 item1 = Item.find(1)
@@ -50,21 +53,51 @@ on_duplicate_update_columns = [:quantity]
 UserItem.atomically.create_or_plus(columns, values, on_duplicate_update_columns)
 ```
 
-#### before
+before
+
 ![before](https://user-images.githubusercontent.com/4011729/48998921-ff430600-f18f-11e8-8eeb-e8a71bbf5802.png)
 
-#### after
+after
+
 ![image](https://user-images.githubusercontent.com/4011729/48999092-8d1ef100-f190-11e8-8372-86e2e99cbe08.png)
 
 
-### pay_all
+### pay_all _(hash, update_columns, primary_key: :id)_
 
 Reduce the quantity of items and return how many rows and updated if all of them is enough.
 Do nothing and return zero if any of them is not enough.
 
-Example:
+#### Parameters
+
+  - `hash` - A hash contains the id of the models as keys and the amount to update the field by as values.
+  - `update_columns` - The column that will be updated.
+  - `primary_key` - Specify the column that `id`(the key of hash) refer to.
+
+#### Example
+
 ```rb
 user.user_items.atomically.pay_all({ item1.id => 4, item2.id => 3 }, [:quantity], primary_key: :item_id)
+```
+
+```sql
+# generated sql
+UPDATE `user_items` SET `quantity` = `quantity` + (@change := 
+  CASE `item_id`
+  WHEN 1 THEN -4
+  WHEN 2 THEN -3
+  END) 
+WHERE `user_items`.`user_id` = 1 AND (
+  `user_items`.`item_id` = 1 AND (`quantity` >= 4) OR `user_items`.`item_id` = -2 AND (`quantity` >= 3)
+) AND (
+  (
+    SELECT COUNT(*) FROM (
+      SELECT `user_items`.* FROM `user_items` 
+      WHERE `user_items`.`user_id` = 1 AND (
+        `user_items`.`item_id` = 1 AND (`quantity` >= 4) OR `user_items`.`item_id` = 2 AND (`quantity` >= 3)
+      )
+    ) subquery
+  ) = 2
+)
 ```
 
 ### update_all _(expected_number, updates)_
@@ -72,8 +105,9 @@ user.user_items.atomically.pay_all({ item1.id => 4, item2.id => 3 }, [:quantity]
 Behaves like [ActiveRecord::Relation#update_all](https://apidock.com/rails/ActiveRecord/Relation/update_all) but add an additional constrain that the number of affected rows equals to what you specify.
 
 #### Parameters
- - `expected_number` - The number of rows that you expect to be updated.
- - `updates` - A string, array, or hash representing the SET part of an SQL statement.
+
+  - `expected_number` - The number of rows that you expect to be updated.
+  - `updates` - A string, array, or hash representing the SET part of an SQL statement.
 
 #### Examples
 ```rb
@@ -84,11 +118,16 @@ User.where(id: [1, 2, 3]).atomically.update_all(2, name: '')
 # => 0
 ```
 
-### update
+### update _(attrs, from: :not_set)_
 
 Updates the attributes of the model from the passed-in hash and saves the record. The difference between this method and [ActiveRecord#update](https://apidock.com/rails/ActiveRecord/Persistence/update) is that it will add extra WHERE conditions to prevent race condition.
 
-Example:
+#### Parameters
+
+  - `attrs` - Same with the first parameter of [ActiveRecord#update](https://apidock.com/rails/ActiveRecord/Persistence/update)
+  - `from` - The value before update. If not set, use the attriutes of the model.
+ 
+#### Example
 ```rb
 class Arena < ApplicationRecord
   def atomically_close!
