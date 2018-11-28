@@ -35,8 +35,11 @@ class Atomically::QueryService
       next "#{column} = #{column} + #{value}"
     end
 
-    return query.where("(#{@klass.from(query).select('COUNT(*)').to_sql}) = ?", hash.size)
-                .update_all(update_sqls.join(', '))
+    return where_all_can_be_updated(query, hash.size).update_all(update_sqls.join(', '))
+  end
+
+  def update_all(expected_size, *args)
+    where_all_can_be_updated(@relation, expected_size).update_all(*args)
   end
 
   def update(attrs, from: :not_set)
@@ -57,6 +60,10 @@ class Atomically::QueryService
 
   def sanitize(value)
     @klass.connection.quote(value)
+  end
+
+  def where_all_can_be_updated(query, expected_size)
+    query.where("(#{@klass.from(query.where('')).select('COUNT(*)').to_sql}) = ?", expected_size)
   end
 
   def update_and_return_number_of_updated_rows(attrs, from)
