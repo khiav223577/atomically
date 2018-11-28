@@ -35,8 +35,7 @@ class Atomically::QueryService
       next "#{column} = #{column} + #{value}"
     end
 
-    return query.where("(#{@klass.from(query).select('COUNT(*)').to_sql}) = ?", hash.size)
-                .update_all(update_sqls.join(', '))
+    return where_all_can_be_updated(query, hash.size).update_all(update_sqls.join(', '))
   end
 
   def update_all(expected_size, *args)
