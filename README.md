@@ -39,6 +39,7 @@ It is useful to add `items` to `user` when `user_items` may not exist.
   - `on_duplicate_update_columns` - The column that will be updated on duplicate.
 
 #### Example
+
 ```rb
 user = User.find(2)
 item1 = Item.find(1)
@@ -61,6 +62,14 @@ after
 
 ![image](https://user-images.githubusercontent.com/4011729/48999092-8d1ef100-f190-11e8-8372-86e2e99cbe08.png)
 
+#### SQL queries
+
+```sql
+INSERT INTO `user_items` (`user_id`,`item_id`,`quantity`,`created_at`,`updated_at`) VALUES 
+  (2,1,3,'2018-11-27 03:44:25','2018-11-27 03:44:25'),
+  (2,2,2,'2018-11-27 03:44:25','2018-11-27 03:44:25') 
+ON DUPLICATE KEY UPDATE `quantity` = `quantity` + VALUES(`quantity`)
+```
 
 ### pay_all _(hash, update_columns, primary_key: :id)_
 
@@ -79,8 +88,9 @@ Do nothing and return zero if any of them is not enough.
 user.user_items.atomically.pay_all({ item1.id => 4, item2.id => 3 }, [:quantity], primary_key: :item_id)
 ```
 
+#### SQL queries
+
 ```sql
-# generated sql
 UPDATE `user_items` SET `quantity` = `quantity` + (@change := 
   CASE `item_id`
   WHEN 1 THEN -4
@@ -118,6 +128,19 @@ User.where(id: [1, 2, 3]).atomically.update_all(2, name: '')
 # => 0
 ```
 
+#### SQL queries
+
+```sql
+# User.where(id: [1, 2, 3]).atomically.update_all(2, name: '')
+UPDATE `users` SET `users`.`name` = '' WHERE `users`.`id` IN (1, 2, 3) AND (
+  (
+    SELECT COUNT(*) FROM (
+      SELECT `users`.* FROM `users` WHERE `users`.`id` IN (1, 2, 3)
+    ) subquery
+  ) = 2
+)
+```
+
 ### update _(attrs, from: :not_set)_
 
 Updates the attributes of the model from the passed-in hash and saves the record. The difference between this method and [ActiveRecord#update](https://apidock.com/rails/ActiveRecord/Persistence/update) is that it will add extra WHERE conditions to prevent race condition.
@@ -128,6 +151,7 @@ Updates the attributes of the model from the passed-in hash and saves the record
   - `from` - The value before update. If not set, use the attriutes of the model.
  
 #### Example
+
 ```rb
 class Arena < ApplicationRecord
   def atomically_close!
@@ -139,6 +163,9 @@ class Arena < ApplicationRecord
   end
 end
 ```
+
+#### SQL queries
+
 ```sql
 # arena.atomically_close!
 UPDATE `arenas` SET `arenas`.`closed_at` = '2018-11-27 03:44:25', `updated_at` = '2018-11-27 03:44:25'
