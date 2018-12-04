@@ -28,6 +28,8 @@ Or install it yourself as:
 
 ## Usage
 
+**ActiveRecord callbacks will NOT be called when calling below methods.**
+
 ### create_or_plus _(columns, values, on_duplicate_update_columns)_
 
 Import an array of records. When key is duplicate, plus the old value with new value.
