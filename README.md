@@ -87,7 +87,7 @@ UPDATE `user_items` SET `quantity` = `quantity` + (@change :=
   WHEN 2 THEN -3
   END) 
 WHERE `user_items`.`user_id` = 1 AND (
-  `user_items`.`item_id` = 1 AND (`quantity` >= 4) OR `user_items`.`item_id` = -2 AND (`quantity` >= 3)
+  `user_items`.`item_id` = 1 AND (`quantity` >= 4) OR `user_items`.`item_id` = 2 AND (`quantity` >= 3)
 ) AND (
   (
     SELECT COUNT(*) FROM (
@@ -95,7 +95,7 @@ WHERE `user_items`.`user_id` = 1 AND (
       WHERE `user_items`.`user_id` = 1 AND (
         `user_items`.`item_id` = 1 AND (`quantity` >= 4) OR `user_items`.`item_id` = 2 AND (`quantity` >= 3)
       )
-    ) subquery
+    ) as subquery
   ) = 2
 )
 ```
