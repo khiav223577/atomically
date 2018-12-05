@@ -28,7 +28,7 @@ Or install it yourself as:
 
 ## Usage
 
-**ActiveRecord callbacks will NOT be called when calling below methods.**
+**ActiveRecord validations and callbacks will NOT be triggered when calling below methods.**
 
 ### create_or_plus _(columns, values, on_duplicate_update_columns)_
 
