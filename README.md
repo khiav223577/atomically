@@ -26,11 +26,11 @@ Or install it yourself as:
 
     $ gem install atomically
 
-## Usage
+## Methods
 
-**ActiveRecord validations and callbacks will NOT be triggered when calling below methods.**
+Note: ActiveRecord validations and callbacks will **NOT** be triggered when calling below methods.
 
-### create_or_plus _(columns, values, on_duplicate_update_columns)_
+## create_or_plus _(columns, values, on_duplicate_update_columns)_
 
 Import an array of records. When key is duplicate, plus the old value with new value.
 It is useful to add `items` to `user` when `user_items` may not exist.
@@ -67,13 +67,13 @@ after
 #### SQL queries
 
 ```sql
-INSERT INTO `user_items` (`user_id`,`item_id`,`quantity`,`created_at`,`updated_at`) VALUES 
+INSERT INTO `user_items` (`user_id`,`item_id`,`quantity`,`created_at`,`updated_at`) VALUES
   (2,1,3,'2018-11-27 03:44:25','2018-11-27 03:44:25'),
-  (2,2,2,'2018-11-27 03:44:25','2018-11-27 03:44:25') 
+  (2,2,2,'2018-11-27 03:44:25','2018-11-27 03:44:25')
 ON DUPLICATE KEY UPDATE `quantity` = `quantity` + VALUES(`quantity`)
 ```
 
-### pay_all _(hash, update_columns, primary_key: :id)_
+## pay_all _(hash, update_columns, primary_key: :id)_
 
 Reduce the quantity of items and return how many rows and updated if all of them is enough.
 Do nothing and return zero if any of them is not enough.
@@ -93,17 +93,17 @@ user.user_items.atomically.pay_all({ item1.id => 4, item2.id => 3 }, [:quantity]
 #### SQL queries
 
 ```sql
-UPDATE `user_items` SET `quantity` = `quantity` + (@change := 
+UPDATE `user_items` SET `quantity` = `quantity` + (@change :=
   CASE `item_id`
   WHEN 1 THEN -4
   WHEN 2 THEN -3
-  END) 
+  END)
 WHERE `user_items`.`user_id` = 1 AND (
   `user_items`.`item_id` = 1 AND (`quantity` >= 4) OR `user_items`.`item_id` = 2 AND (`quantity` >= 3)
 ) AND (
   (
     SELECT COUNT(*) FROM (
-      SELECT `user_items`.* FROM `user_items` 
+      SELECT `user_items`.* FROM `user_items`
       WHERE `user_items`.`user_id` = 1 AND (
         `user_items`.`item_id` = 1 AND (`quantity` >= 4) OR `user_items`.`item_id` = 2 AND (`quantity` >= 3)
       )
@@ -112,7 +112,7 @@ WHERE `user_items`.`user_id` = 1 AND (
 )
 ```
 
-### update_all _(expected_number, updates)_
+## update_all _(expected_number, updates)_
 
 Behaves like [ActiveRecord::Relation#update_all](https://apidock.com/rails/ActiveRecord/Relation/update_all) but add an additional constrain that the number of affected rows equals to what you specify.
 
@@ -143,7 +143,7 @@ UPDATE `users` SET `users`.`name` = '' WHERE `users`.`id` IN (1, 2, 3) AND (
 )
 ```
 
-### update _(attrs, from: :not_set)_
+## update _(attrs, from: :not_set)_
 
 Updates the attributes of the model from the passed-in hash and saves the record. The difference between this method and [ActiveRecord#update](https://apidock.com/rails/ActiveRecord/Persistence/update) is that it will add extra WHERE conditions to prevent race condition.
 
@@ -151,7 +151,7 @@ Updates the attributes of the model from the passed-in hash and saves the record
 
   - `attrs` - Same with the first parameter of [ActiveRecord#update](https://apidock.com/rails/ActiveRecord/Persistence/update)
   - `from` - The value before update. If not set, use the attriutes of the model.
- 
+
 #### Example
 
 ```rb
@@ -166,7 +166,7 @@ class Arena < ApplicationRecord
 end
 ```
 
-#### SQL queries
+### SQL queries
 
 ```sql
 # arena.atomically_close!
