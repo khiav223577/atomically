@@ -10,6 +10,18 @@
 
 Supports Rails 3.2, 4.2, 5.0, 5.1, 5.2.
 
+## Table of contents
+
+1. [Installation](#installation)
+2. [Methods](#methods)
+   - [create_or_plus](#create_or_plus-columns-values-on_duplicate_update_columns)
+   - [pay_all](#pay_all-hash-update_columns-primary_key-id)
+   - [update_all](#update_all-expected_number-updates)
+   - [update](#update-attrs-from-not_set)
+3. [Development](#development)
+4. [Contributing](#contributing)
+5. [License](#license)
+
 ## Installation
 
 Add this line to your application's Gemfile:
