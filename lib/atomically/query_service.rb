@@ -48,6 +48,17 @@ class Atomically::QueryService
     return success
   end
 
+  def update_all_and_get_ids(*args)
+    ids = nil
+    id_column = "#{@klass.quoted_table_name}.#{quote_column(:id)}"
+    @klass.transaction do
+      @relation.connection.execute('SET @ids := NULL')
+      @relation.where("(SELECT @ids := CONCAT_WS(',', #{id_column}, @ids))").update_all(*args) # 撈出有真的被更新的 id，用逗號串在一起
+      ids = @klass.from(nil).pluck('@ids').first
+    end
+    return ids.try{|s| s.split(',').map(&:to_i).uniq.sort } || [] # 將 id 從字串取出來 @id 的格式範例: '1,4,12'
+  end
+
   private
 
   def on_duplicate_key_plus_sql(columns)
