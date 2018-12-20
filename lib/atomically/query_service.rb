@@ -56,7 +56,7 @@ class Atomically::QueryService
       @relation.where("(SELECT @id := CONCAT_WS(',', #{id_column}, @id))").update_all(*args) # 撈出有真的被更新的 id，用逗號串在一起
       ids = @klass.from(nil).pluck('@id').first
     end
-    return ids.try{|s| s.split(',').map(&:to_i).uniq.sort } # 將 id 從字串取出來 @id 的格式範例: '1,4,12'
+    return ids.try{|s| s.split(',').map(&:to_i).uniq.sort } || [] # 將 id 從字串取出來 @id 的格式範例: '1,4,12'
   end
 
   private

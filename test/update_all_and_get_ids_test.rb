@@ -18,6 +18,13 @@ class UpdateAllAndGetIdsTest < Minitest::Test
     end
   end
 
+  def test_none
+    in_sandbox do
+      assert_equal [], Item.none.atomically.update_all_and_get_ids(name: '')
+      assert_equal ['bomb', 'water gun', 'flame thrower'], Item.pluck(:name)
+    end
+  end
+
   def test_where_by_name
     in_sandbox do
       assert_equal [2], Item.where(name: 'water gun').atomically.update_all_and_get_ids(name: '')
