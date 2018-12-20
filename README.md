@@ -18,6 +18,7 @@ Supports Rails 3.2, 4.2, 5.0, 5.1, 5.2.
    - [pay_all](#pay_all-hash-update_columns-primary_key-id)
    - [update_all](#update_all-expected_number-updates)
    - [update](#update-attrs-from-not_set)
+   - [update_all_and_get_ids](#update_all_and_get_ids-updates)
 3. [Development](#development)
 4. [Contributing](#contributing)
 5. [License](#license)
@@ -191,6 +192,33 @@ WHERE `arenas`.`id` = 1752 AND `arenas`.`closed_at` IS NULL
 # arena.close!
 UPDATE `arenas` SET `arenas`.`closed_at` = '2018-11-27 03:44:25', `updated_at` = '2018-11-27 03:44:25'
 WHERE `arenas`.`id` = 1752
+```
+
+---
+### update_all_and_get_ids _(updates)_
+
+Behaves like [ActiveRecord::Relation#update_all](https://apidock.com/rails/ActiveRecord/Relation/update_all), but return the ids array of updated records instead of the number of updated records.
+
+
+#### Parameters
+
+  - `updates` - A string, array, or hash representing the SET part of an SQL statement.
+
+#### Example
+
+```rb
+User.where(account: ['moon', 'wolf']).atomically.update_all_and_get_ids('money = money + 1')
+# => [254, 371]
+```
+
+#### SQL queries
+
+```sql
+BEGIN
+  SET @ids := NULL
+  UPDATE `users` SET money = money + 1 WHERE `users`.`account` IN ('moon', 'wolf') AND ((SELECT @ids := CONCAT_WS(',', `users`.`id`, @ids)))
+  SELECT @ids FROM DUAL
+COMMIT
 ```
 
 ## Development
