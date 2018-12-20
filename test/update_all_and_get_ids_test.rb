@@ -6,14 +6,14 @@ class UpdateAllAndGetIdsTest < Minitest::Test
 
   def test_on_klass
     in_sandbox do
-      assert_equal [3, 2, 1], Item.atomically.update_all_and_get_ids(name: '')
+      assert_equal [1, 2, 3], Item.atomically.update_all_and_get_ids(name: '')
       assert_equal ['', '', ''], Item.pluck(:name)
     end
   end
 
   def test_on_relation
     in_sandbox do
-      assert_equal [3, 1], Item.where(id: [1, 3]).atomically.update_all_and_get_ids(name: '')
+      assert_equal [1, 3], Item.where(id: [1, 3]).atomically.update_all_and_get_ids(name: '')
       assert_equal ['', 'water gun', ''], Item.pluck(:name)
     end
   end
@@ -27,7 +27,7 @@ class UpdateAllAndGetIdsTest < Minitest::Test
 
   def test_with_joins
     in_sandbox do
-      assert_equal [2, 1], Item.joins(:users).atomically.update_all_and_get_ids(name: '')
+      assert_equal [1, 2], Item.joins(:users).atomically.update_all_and_get_ids(name: '')
       assert_equal ['', '', 'flame thrower'], Item.pluck(:name)
     end
   end
