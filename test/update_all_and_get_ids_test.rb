@@ -33,8 +33,16 @@ class UpdateAllAndGetIdsTest < Minitest::Test
   end
 
   def test_with_joins
+    skip if ActiveRecord::VERSION::MAJOR < 4 # join + update_all result in ambiguous column name in Rails 3
     in_sandbox do
       assert_equal [1, 2], Item.joins(:users).atomically.update_all_and_get_ids(name: '')
+      assert_equal ['', '', 'flame thrower'], Item.pluck(:name)
+    end
+  end
+
+  def test_with_joins_with_raw_string_args
+    in_sandbox do
+      assert_equal [1, 2], Item.joins(:users).atomically.update_all_and_get_ids('items.name = ""')
       assert_equal ['', '', 'flame thrower'], Item.pluck(:name)
     end
   end
