@@ -386,6 +386,7 @@ Layout/AlignHash:
   Description: >-
                  Align the elements of a hash literal if they span more than
                  one line.
+  EnforcedHashRocketStyle: table
   Enabled: true
 
 Layout/AlignParameters:
