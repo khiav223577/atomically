@@ -48,6 +48,18 @@ class Atomically::QueryService
     return success
   end
 
+  # ==== Parameters
+  #
+  # * +counters+ - A Hash containing the names of the fields
+  #   to update as keys and the amount to update the field by as values.
+  def decrease_counter(counters)
+    open_update_all_scope do
+      counters.each do |field, amount|
+        where("#{field} > ?", amount).update(field => amount) if amount > 0
+      end
+    end
+  end
+
   def update_all_and_get_ids(*args)
     ids = nil
     id_column = "#{@klass.quoted_table_name}.#{quote_column(:id)}"
