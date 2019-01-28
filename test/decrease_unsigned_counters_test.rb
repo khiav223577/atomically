@@ -16,6 +16,16 @@ class DecreaseUnsignedCountersTest < Minitest::Test
     end
   end
 
+  def test_decrement_one_column_and_is_exactly_enough
+    user = User.find_by(name: 'user_with_bomb_and_water_gun')
+    in_sandbox do
+      assert_queries(1) do
+        assert_equal true, user.atomically.decrement_unsigned_counters(money: 100)
+      end
+      assert_equal 0, user.reload.money
+    end
+  end
+
   def test_decrement_one_column_and_is_not_enough
     user = User.find_by(name: 'user_with_bomb_and_water_gun')
     in_sandbox do
