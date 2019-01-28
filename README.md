@@ -230,6 +230,8 @@ WHERE `arenas`.`id` = 1752
 
 Decrement numeric fields via a direct SQL update, and make sure that it will not become negative.
 
+Return true if update successfully, false otherwise.
+
 
 #### Parameters
 
