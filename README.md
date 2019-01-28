@@ -256,7 +256,7 @@ user.reload.money
 
 ```sql
 # user.atomically.decrement_unsigned_counters(money: 140)
-UPDATE `users` SET money = money - 10 WHERE `users`.`id` = 1 AND (money > 140)
+UPDATE `users` SET money = money - 140 WHERE `users`.`id` = 1 AND (money > 140)
 ```
 
 ## Development
