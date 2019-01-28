@@ -243,12 +243,12 @@ user.money
 
 user.atomically.decrement_unsigned_counters(money: 10)
 # => true
-user.money
+user.reload.money
 # => 90
 
 user.atomically.decrement_unsigned_counters(money: 999)
 # => false
-user.money
+user.reload.money
 # => 90
 ```
 
