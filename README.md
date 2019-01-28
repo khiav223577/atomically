@@ -14,11 +14,13 @@ Supports Rails 3.2, 4.2, 5.0, 5.1, 5.2.
 
 1. [Installation](#installation)
 2. [Methods](#methods)
-   - [create_or_plus](#create_or_plus-columns-values-on_duplicate_update_columns)
-   - [pay_all](#pay_all-hash-update_columns-primary_key-id)
-   - [update_all](#update_all-expected_number-updates)
-   - [update](#update-attrs-from-not_set)
-   - [update_all_and_get_ids](#update_all_and_get_ids-updates)
+   - Relation Methods
+     - [create_or_plus](#create_or_plus-columns-values-on_duplicate_update_columns)
+     - [pay_all](#pay_all-hash-update_columns-primary_key-id)
+     - [update_all](#update_all-expected_number-updates)
+     - [update_all_and_get_ids](#update_all_and_get_ids-updates)
+   - Model Methods
+     - [update](#update-attrs-from-not_set)
 3. [Development](#development)
 4. [Contributing](#contributing)
 5. [License](#license)
@@ -159,42 +161,6 @@ UPDATE `users` SET `users`.`name` = '' WHERE `users`.`id` IN (1, 2, 3) AND (
 ```
 
 ---
-### update _(attrs, from: :not_set)_
-
-Updates the attributes of the model from the passed-in hash and saves the record. The difference between this method and [ActiveRecord#update](https://apidock.com/rails/ActiveRecord/Persistence/update) is that it will add extra WHERE conditions to prevent race condition.
-
-#### Parameters
-
-  - `attrs` - Same with the first parameter of [ActiveRecord#update](https://apidock.com/rails/ActiveRecord/Persistence/update)
-  - `from` - The value before update. If not set, use the attriutes of the model.
-
-#### Example
-
-```rb
-class Arena < ApplicationRecord
-  def atomically_close!
-    atomically.update(closed_at: Time.now)
-  end
-
-  def close!
-    update(closed_at: Time.now)
-  end
-end
-```
-
-#### SQL queries
-
-```sql
-# arena.atomically_close!
-UPDATE `arenas` SET `arenas`.`closed_at` = '2018-11-27 03:44:25', `updated_at` = '2018-11-27 03:44:25'
-WHERE `arenas`.`id` = 1752 AND `arenas`.`closed_at` IS NULL
-
-# arena.close!
-UPDATE `arenas` SET `arenas`.`closed_at` = '2018-11-27 03:44:25', `updated_at` = '2018-11-27 03:44:25'
-WHERE `arenas`.`id` = 1752
-```
-
----
 ### update_all_and_get_ids _(updates)_
 
 Behaves like [ActiveRecord::Relation#update_all](https://apidock.com/rails/ActiveRecord/Relation/update_all), but return the ids array of updated records instead of the number of updated records.
@@ -219,6 +185,43 @@ BEGIN
   UPDATE `users` SET money = money + 1 WHERE `users`.`account` IN ('moon', 'wolf') AND ((SELECT @ids := CONCAT_WS(',', `users`.`id`, @ids)))
   SELECT @ids FROM DUAL
 COMMIT
+```
+
+---
+### update _(attrs, from: :not_set)_
+
+Updates the attributes of the model from the passed-in hash and saves the record. The difference between this method and [ActiveRecord#update](https://apidock.com/rails/ActiveRecord/Persistence/update) is that it will add extra WHERE conditions to prevent race condition.
+
+#### Parameters
+
+  - `attrs` - Same with the first parameter of [ActiveRecord#update](https://apidock.com/rails/ActiveRecord/Persistence/update)
+  - `from` - The value before update. If not set, use the current attriutes of the model.
+
+#### Example
+
+```rb
+class Arena < ApplicationRecord
+  def atomically_close!
+    atomically.update(closed_at: Time.now)
+  end
+
+  def close!
+    update(closed_at: Time.now)
+  end
+end
+```
+
+#### SQL queries
+
+```sql
+# arena.atomically_close!
+# (let arena.closed_at to be nil)
+UPDATE `arenas` SET `arenas`.`closed_at` = '2018-11-27 03:44:25', `updated_at` = '2018-11-27 03:44:25'
+WHERE `arenas`.`id` = 1752 AND `arenas`.`closed_at` IS NULL
+
+# arena.close!
+UPDATE `arenas` SET `arenas`.`closed_at` = '2018-11-27 03:44:25', `updated_at` = '2018-11-27 03:44:25'
+WHERE `arenas`.`id` = 1752
 ```
 
 ## Development
