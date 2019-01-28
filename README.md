@@ -21,6 +21,7 @@ Supports Rails 3.2, 4.2, 5.0, 5.1, 5.2.
      - [update_all_and_get_ids](#update_all_and_get_ids-updates)
    - Model Methods
      - [update](#update-attrs-from-not_set)
+     - [decrement_unsigned_counters](#decrement_unsigned_counters-counters)
 3. [Development](#development)
 4. [Contributing](#contributing)
 5. [License](#license)
@@ -222,6 +223,40 @@ WHERE `arenas`.`id` = 1752 AND `arenas`.`closed_at` IS NULL
 # arena.close!
 UPDATE `arenas` SET `arenas`.`closed_at` = '2018-11-27 03:44:25', `updated_at` = '2018-11-27 03:44:25'
 WHERE `arenas`.`id` = 1752
+```
+
+---
+### decrement_unsigned_counters _(counters)_
+
+Decrement numeric fields via a direct SQL update, and make sure that it will not become negative.
+
+
+#### Parameters
+
+  - `counters` - A Hash containing the names of the fields to update as keys and the amount to update the field by as values.
+
+#### Example
+
+```rb
+user.money
+# => 100
+
+user.atomically.decrement_unsigned_counters(money: 10)
+# => true
+user.money
+# => 90
+
+user.atomically.decrement_unsigned_counters(money: 999)
+# => false
+user.money
+# => 90
+```
+
+#### SQL queries
+
+```sql
+# user.atomically.decrement_unsigned_counters(money: 140)
+UPDATE `users` SET money = money - 10 WHERE `users`.`id` = 1 AND (money > 140)
 ```
 
 ## Development
