@@ -55,7 +55,7 @@ class Atomically::QueryService
   def decrement_unsigned_counters(counters)
     result = open_update_all_scope do
       counters.each do |field, amount|
-        where("#{field} > ?", amount).update("#{field} = #{field} - ?", amount) if amount > 0
+        where("#{field} >= ?", amount).update("#{field} = #{field} - ?", amount) if amount > 0
       end
     end
     return (result == 1)
