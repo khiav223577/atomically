@@ -5,6 +5,8 @@ ActiveRecord::Schema.define do
 
   create_table :users, force: true do |t|
     t.string :name
+    t.integer :money, default: 0
+    t.integer :action_point, default: 0
     t.timestamps null: false
   end
 
@@ -28,8 +30,8 @@ end
 ActiveSupport::Dependencies.autoload_paths << File.expand_path('../models/', __FILE__)
 
 users = User.create([
-  { name: 'user_with_bomb_and_water_gun' },
-  { name: 'user_with_bomb' },
+  { name: 'user_with_bomb_and_water_gun', money: 100, action_point: 3 },
+  { name: 'user_with_bomb', money: 200, action_point: 0 },
   { name: 'user_without_item' },
 ])
 

@@ -53,11 +53,12 @@ class Atomically::QueryService
   # * +counters+ - A Hash containing the names of the fields
   #   to update as keys and the amount to update the field by as values.
   def decrease_counter(counters)
-    open_update_all_scope do
+    result = open_update_all_scope do
       counters.each do |field, amount|
-        where("#{field} > ?", amount).update(field => amount) if amount > 0
+        where("#{field} > ?", amount).update("#{field} = #{field} - ?", amount) if amount > 0
       end
     end
+    return (result == 1)
   end
 
   def update_all_and_get_ids(*args)
