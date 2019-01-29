@@ -1,5 +1,8 @@
 ## Change Log
 
+### [v1.0.6](https://github.com/khiav223577/atomically/compare/v1.0.5...v1.0.6) 2019/01/28
+- [#10](https://github.com/khiav223577/atomically/pull/10) `decrement_unsigned_counters` should be able to decrement the field to zero (@khiav223577)
+
 ### [v1.0.5](https://github.com/khiav223577/atomically/compare/v1.0.4...v1.0.5) 2019/01/28
 - [#9](https://github.com/khiav223577/atomically/pull/9) Implement `decrement_unsigned_counters` (@khiav223577)
 - [#8](https://github.com/khiav223577/atomically/pull/8) Fix: broken test cases after bundler 2.0 was released (@khiav223577)
