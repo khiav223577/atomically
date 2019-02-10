@@ -19,7 +19,11 @@ class UpdateAllScope
 
   def do_query!
     return 0 if @queries.empty?
-    return @relation.update_all(@queries.join(','))
+    return @relation.update_all(updates_as_string)
+  end
+
+  def updates_as_string
+    @queries.join(',')
   end
 
   def klass
@@ -28,9 +32,14 @@ class UpdateAllScope
 
   # See: https://github.com/rails/rails/blob/fc5dd0b85189811062c85520fd70de8389b55aeb/activerecord/lib/active_record/relation.rb#L315
   def to_update_manager
+    if @relation.eager_loading?
+      scope = UpdateAllScope.new(model: model, relation: @relation.apply_join_dependency)
+      return scope.update(updates_as_string).to_update_manager
+    end
+
     stmt = Arel::UpdateManager.new
 
-    stmt.set Arel.sql(@queries.join(','))
+    stmt.set Arel.sql(klass.sanitize_sql_for_assignment(updates_as_string))
     stmt.table(@relation.table)
 
     if @relation.send(:has_join_values?) || @relation.offset_value
