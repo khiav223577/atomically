@@ -18,8 +18,8 @@ class Atomically::QueryService
     @model = model
   end
 
-  def create_or_plus(columns, data, update_columns, conflict_targets: DEFAULT_CONFLICT_TARGETS)
-    @klass.import(columns, data, on_duplicate_key_update: on_duplicate_key_plus_sql(update_columns, conflict_targets))
+  def create_or_plus(columns, data, update_columns, conflict_target: DEFAULT_CONFLICT_TARGETS)
+    @klass.import(columns, data, on_duplicate_key_update: on_duplicate_key_plus_sql(update_columns, conflict_target))
   end
 
   def pay_all(hash, update_columns, primary_key: :id) # { id => pay_count }
@@ -79,11 +79,11 @@ class Atomically::QueryService
 
   private
 
-  def on_duplicate_key_plus_sql(columns, conflict_targets)
+  def on_duplicate_key_plus_sql(columns, conflict_target)
     service = Atomically::OnDuplicateSqlService.new(@klass, columns)
     return service.mysql_quote_columns_for_plus.join(', ') if Atomically::AdapterCheckService.new(@klass).mysql?
     return {
-      conflict_target: conflict_targets,
+      conflict_target: conflict_target,
       columns: service.pg_quote_columns_for_plus.join(', ')
     }
   end
