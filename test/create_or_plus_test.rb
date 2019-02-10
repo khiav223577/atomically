@@ -4,6 +4,33 @@ require 'test_helper'
 
 class CreateOrPlusTest < Minitest::Test
   def setup
+    @columns = [:user_id, :item_id, :count, :count_in_bag]
+    @conflict_targets = Atomically::AdapterCheckService.new(UserItem).pg? ? [:user_id, :item_id] : nil
+  end
+
+  def test_no_need_to_pass_conflict_targets_in_mysql
+    skip if not Atomically::AdapterCheckService.new(UserItem).mysql?
+
+    user = User.find_by(name: 'user_with_bomb')
+    item = Item.find_by(name: 'bomb')
+
+    in_sandbox do
+      UserItem.atomically.create_or_plus(@columns, [[user.id, item.id, 4, 3]], [:count])
+      assert_equal [[item.id, 12, 4]], user.items.pluck(:item_id, :count, :count_in_bag)
+    end
+  end
+
+  def test_pass_wrong_conflict_targets_in_pg
+    skip if not Atomically::AdapterCheckService.new(UserItem).pg?
+
+    user = User.find_by(name: 'user_with_bomb')
+    item = Item.find_by(name: 'bomb')
+
+    in_sandbox do
+      assert_raises ActiveRecord::RecordNotUnique do
+        UserItem.atomically.create_or_plus(@columns, [[user.id, item.id, 4, 3]], [:count])
+      end
+    end
   end
 
   def test_add_items_to_user_who_already_had_all_of_them
@@ -12,12 +39,12 @@ class CreateOrPlusTest < Minitest::Test
     data = [[user.id, item.id, 4, 3]]
 
     in_sandbox do
-      UserItem.atomically.create_or_plus([:user_id, :item_id, :count, :count_in_bag], data, [:count])
+      UserItem.atomically.create_or_plus(@columns, data, [:count], conflict_targets: @conflict_targets)
       assert_equal [[item.id, 12, 4]], user.items.pluck(:item_id, :count, :count_in_bag)
     end
 
     in_sandbox do
-      UserItem.atomically.create_or_plus([:user_id, :item_id, :count, :count_in_bag], data, [:count, :count_in_bag])
+      UserItem.atomically.create_or_plus(@columns, data, [:count, :count_in_bag], conflict_targets: @conflict_targets)
       assert_equal [[item.id, 12, 7]], user.items.pluck(:item_id, :count, :count_in_bag)
     end
   end
@@ -28,12 +55,12 @@ class CreateOrPlusTest < Minitest::Test
     data = [[user.id, item.id, 4, 3]]
 
     in_sandbox do
-      UserItem.atomically.create_or_plus([:user_id, :item_id, :count, :count_in_bag], data, [:count])
+      UserItem.atomically.create_or_plus(@columns, data, [:count], conflict_targets: @conflict_targets)
       assert_equal [[item.id, 4, 3]], user.items.pluck(:item_id, :count, :count_in_bag)
     end
 
     in_sandbox do
-      UserItem.atomically.create_or_plus([:user_id, :item_id, :count, :count_in_bag], data, [:count, :count_in_bag])
+      UserItem.atomically.create_or_plus(@columns, data, [:count, :count_in_bag], conflict_targets: @conflict_targets)
       assert_equal [[item.id, 4, 3]], user.items.pluck(:item_id, :count, :count_in_bag)
     end
   end
@@ -45,12 +72,12 @@ class CreateOrPlusTest < Minitest::Test
     data = [[user.id, item1.id, 4, 3], [user.id, item2.id, 10, 8]]
 
     in_sandbox do
-      UserItem.atomically.create_or_plus([:user_id, :item_id, :count, :count_in_bag], data, [:count])
+      UserItem.atomically.create_or_plus(@columns, data, [:count], conflict_targets: @conflict_targets)
       assert_equal [[item1.id, 12, 4], [item2.id, 10, 8]], user.items.pluck(:item_id, :count, :count_in_bag)
     end
 
     in_sandbox do
-      UserItem.atomically.create_or_plus([:user_id, :item_id, :count, :count_in_bag], data, [:count, :count_in_bag])
+      UserItem.atomically.create_or_plus(@columns, data, [:count, :count_in_bag], conflict_targets: @conflict_targets)
       assert_equal [[item1.id, 12, 7], [item2.id, 10, 8]], user.items.pluck(:item_id, :count, :count_in_bag)
     end
   end

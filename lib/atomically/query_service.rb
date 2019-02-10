@@ -4,6 +4,7 @@ require 'activerecord-import'
 require 'rails_or'
 require 'atomically/update_all_scope'
 require 'atomically/on_duplicate_sql_service'
+require 'atomically/adapter_check_service'
 require 'atomically/patches/clear_attribute_changes' if not ActiveModel::Dirty.method_defined?(:clear_attribute_changes) and not ActiveModel::Dirty.private_method_defined?(:clear_attribute_changes)
 require 'atomically/patches/none' if not ActiveRecord::Base.respond_to?(:none)
 require 'atomically/patches/from' if Gem::Version.new(ActiveRecord::VERSION::STRING) < Gem::Version.new('4.0.0')
@@ -80,21 +81,11 @@ class Atomically::QueryService
 
   def on_duplicate_key_plus_sql(columns, conflict_targets)
     service = Atomically::OnDuplicateSqlService.new(@klass, columns)
-    return service.mysql_quote_columns_for_plus.join(', ') if mysql?
+    return service.mysql_quote_columns_for_plus.join(', ') if Atomically::AdapterCheckService.new(@klass).mysql?
     return {
       conflict_target: conflict_targets,
       columns: service.pg_quote_columns_for_plus.join(', ')
     }
-  end
-
-  def pg?
-    return false if not defined?(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
-    return @klass.connection.is_a?(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
-  end
-
-  def mysql?
-    return false if not defined?(ActiveRecord::ConnectionAdapters::Mysql2Adapter)
-    return @klass.connection.is_a?(ActiveRecord::ConnectionAdapters::Mysql2Adapter)
   end
 
   def quote_column_with_table(column)
