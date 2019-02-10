@@ -31,7 +31,7 @@ class UpdateAllScope
   end
 
   # See: https://github.com/rails/rails/blob/fc5dd0b85189811062c85520fd70de8389b55aeb/activerecord/lib/active_record/relation.rb#L315
-  def to_update_manager
+  def to_arel
     if @relation.eager_loading?
       scope = UpdateAllScope.new(model: model, relation: @relation.apply_join_dependency)
       return scope.update(updates_as_string).to_update_manager
@@ -55,6 +55,9 @@ class UpdateAllScope
   end
 
   def to_sql
-    to_update_manager.to_sql
+    connection = klass.connection
+    sql, vars = connection.send(:to_sql_and_binds, to_arel, [])
+    connection.type_casted_binds(vars).each_with_index{|var, idx| sql = sql.gsub("$#{idx + 1}", connection.quote(var)) }
+    return sql
   end
 end
