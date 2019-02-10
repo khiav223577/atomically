@@ -11,8 +11,8 @@ require 'minitest/autorun'
 case ENV['DB']
 when 'mysql'
   require 'lib/mysql2_connection'
-# when 'pg'
-#   require 'lib/postgresql_connection'
+when 'pg'
+  require 'lib/postgresql_connection'
 else
   fail 'no database'
 end

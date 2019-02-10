@@ -8,6 +8,7 @@ env:
     - CC_TEST_REPORTER_ID=12e1facab2e8910c9b9d6b9e6870c5544a5c44a1bef25cc6638fd132aa4af6b4
   matrix:
     - DB=mysql
+    - DB=pg
 gemfile:
   - gemfiles/3.2.gemfile
   - gemfiles/4.2.gemfile
@@ -27,6 +28,7 @@ before_install:
   - ./cc-test-reporter before-build
 before_script:
   - mysql -u root -e 'CREATE DATABASE travis_ci_test;'
+  - psql -c 'create database travis_ci_test;' -U postgres
 script:
   - bundle exec rake test
 after_script:
