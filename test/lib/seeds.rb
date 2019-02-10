@@ -41,7 +41,7 @@ items = Item.create([
   { name: 'flame thrower' },
 ])
 
-user_items = UserItem.create([
+UserItem.create([
   { user: users[0], item: items[0], count: 3, count_in_bag: 2 },
   { user: users[0], item: items[1], count: 5, count_in_bag: 5 },
   { user: users[1], item: items[0], count: 8, count_in_bag: 4 },
