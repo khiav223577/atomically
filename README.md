@@ -17,7 +17,7 @@ Supports Rails 3.2, 4.2, 5.0, 5.1, 5.2.
 1. [Installation](#installation)
 2. [Methods](#methods)
    - Relation Methods
-     - [create_or_plus](#create_or_plus-columns-values-on_duplicate_update_columns)
+     - [create_or_plus](#create_or_plus-columns-values-on_duplicate_update_columns-conflict_target)
      - [pay_all](#pay_all-hash-update_columns-primary_key-id)
      - [update_all](#update_all-expected_number-updates)
      - [update_all_and_get_ids](#update_all_and_get_ids-updates)
@@ -48,7 +48,7 @@ Or install it yourself as:
 
 Note: ActiveRecord validations and callbacks will **NOT** be triggered when calling below methods.
 
-### create_or_plus _(columns, values, on_duplicate_update_columns)_
+### create_or_plus _(columns, values, on_duplicate_update_columns, conflict_target:)_
 
 Import an array of records. When key is duplicate, plus the old value with new value.
 It is useful to add `items` to `user` when `user_items` may not exist.
@@ -57,6 +57,7 @@ It is useful to add `items` to `user` when `user_items` may not exist.
 
   - First two args (`columns`, `values`) are the same with the [import](https://github.com/zdennis/activerecord-import#columns-and-arrays) method.
   - `on_duplicate_update_columns` - The column that will be updated on duplicate.
+  - `conflict_target` - Needed only in pg. Specifies which columns have unique index.
 
 #### Example
 
@@ -71,7 +72,11 @@ columns = [:user_id, :item_id, :quantity]
 values = [[user.id, item1.id, 3], [user.id, item2.id, 2]]
 on_duplicate_update_columns = [:quantity]
 
+# mysql
 UserItem.atomically.create_or_plus(columns, values, on_duplicate_update_columns)
+
+# pg
+UserItem.atomically.create_or_plus(columns, values, on_duplicate_update_columns, conflict_target: [:user_id, :item_id])
 ```
 
 before
@@ -85,10 +90,19 @@ after
 #### SQL queries
 
 ```sql
+# mysql
 INSERT INTO `user_items` (`user_id`,`item_id`,`quantity`,`created_at`,`updated_at`) VALUES
   (2,1,3,'2018-11-27 03:44:25','2018-11-27 03:44:25'),
   (2,2,2,'2018-11-27 03:44:25','2018-11-27 03:44:25')
-ON DUPLICATE KEY UPDATE `quantity` = `quantity` + VALUES(`quantity`)
+ON DUPLICATE KEY UPDATE 
+  `quantity` = `quantity` + VALUES(`quantity`)
+
+# pg
+INSERT INTO "user_items" ("user_id","item_id","quantity","created_at","updated_at") VALUES 
+  (2,1,3,'2018-11-27 03:44:25.847909','2018-11-27 03:44:25.847909'),
+  (2,2,2,'2018-11-27 03:44:25.847909','2018-11-27 03:44:25.847909') 
+ON CONFLICT (user_id, item_id) DO UPDATE SET 
+  "quantity" = "user_items"."quantity" + excluded."quantity"  RETURNING "id"
 ```
 
 ---
