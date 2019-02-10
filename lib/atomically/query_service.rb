@@ -3,19 +3,22 @@
 require 'activerecord-import'
 require 'rails_or'
 require 'atomically/update_all_scope'
+require 'atomically/on_duplicate_sql_service'
 require 'atomically/patches/clear_attribute_changes' if not ActiveModel::Dirty.method_defined?(:clear_attribute_changes) and not ActiveModel::Dirty.private_method_defined?(:clear_attribute_changes)
 require 'atomically/patches/none' if not ActiveRecord::Base.respond_to?(:none)
 require 'atomically/patches/from' if Gem::Version.new(ActiveRecord::VERSION::STRING) < Gem::Version.new('4.0.0')
 
 class Atomically::QueryService
+  DEFAULT_CONFLICT_TARGETS = [:id].freeze
+
   def initialize(klass, relation: nil, model: nil)
     @klass = klass
     @relation = relation || @klass
     @model = model
   end
 
-  def create_or_plus(columns, data, update_columns)
-    @klass.import(columns, data, on_duplicate_key_update: on_duplicate_key_plus_sql(update_columns))
+  def create_or_plus(columns, data, update_columns, conflict_targets: DEFAULT_CONFLICT_TARGETS)
+    @klass.import(columns, data, on_duplicate_key_update: on_duplicate_key_plus_sql(update_columns, conflict_targets))
   end
 
   def pay_all(hash, update_columns, primary_key: :id) # { id => pay_count }
@@ -63,9 +66,10 @@ class Atomically::QueryService
 
   def update_all_and_get_ids(*args)
     ids = nil
-    id_column = "#{@klass.quoted_table_name}.#{quote_column(:id)}"
+    id_column = quote_column_with_table(:id)
     @klass.transaction do
-      @relation.connection.execute('SET @ids := NULL')
+      @relation.connection.execute('set session my.vars.ids = 1;')
+      # @relation.connection.execute('WITH master_user AS 1')
       @relation.where("(SELECT @ids := CONCAT_WS(',', #{id_column}, @ids))").update_all(*args) # 撈出有真的被更新的 id，用逗號串在一起
       ids = @klass.from(nil).pluck(Arel.sql('@ids')).first
     end
@@ -74,8 +78,27 @@ class Atomically::QueryService
 
   private
 
-  def on_duplicate_key_plus_sql(columns)
-    columns.lazy.map(&method(:quote_column)).map{|s| "#{s} = #{s} + VALUES(#{s})" }.force.join(', ')
+  def on_duplicate_key_plus_sql(columns, conflict_targets)
+    service = Atomically::OnDuplicateSqlService.new(@klass, columns)
+    return service.mysql_quote_columns_for_plus.join(', ') if mysql?
+    return {
+      conflict_target: conflict_targets,
+      columns: service.pg_quote_columns_for_plus.join(', ')
+    }
+  end
+
+  def pg?
+    return false if not defined?(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
+    return @klass.connection.is_a?(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
+  end
+
+  def mysql?
+    return false if not defined?(ActiveRecord::ConnectionAdapters::Mysql2Adapter)
+    return @klass.connection.is_a?(ActiveRecord::ConnectionAdapters::Mysql2Adapter)
+  end
+
+  def quote_column_with_table(column)
+    "#{@klass.quoted_table_name}.#{quote_column(column)}"
   end
 
   def quote_column(column)
