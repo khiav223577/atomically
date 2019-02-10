@@ -66,11 +66,16 @@ class Atomically::QueryService
   end
 
   def update_all_and_get_ids(*args)
+    if Atomically::AdapterCheckService.new(@klass).pg?
+      scope = UpdateAllScope.new(model: @model, relation: @relation.where(''))
+      scope.update(*args)
+      return @klass.connection.execute("#{scope.to_sql} RETURNING id", "#{@klass} Update All").map{|s| s['id'] }
+    end
+
     ids = nil
     id_column = quote_column_with_table(:id)
     @klass.transaction do
-      @relation.connection.execute('set session my.vars.ids = 1;')
-      # @relation.connection.execute('WITH master_user AS 1')
+      @relation.connection.execute('SET @ids := NULL')
       @relation.where("(SELECT @ids := CONCAT_WS(',', #{id_column}, @ids))").update_all(*args) # 撈出有真的被更新的 id，用逗號串在一起
       ids = @klass.from(nil).pluck(Arel.sql('@ids')).first
     end
