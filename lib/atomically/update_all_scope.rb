@@ -44,7 +44,7 @@ class UpdateAllScope
 
     key = arel_attribute(@relation.primary_key)
     if has_join_values? || @relation.offset_value
-      klass.connection.join_to_update(stmt, @relation.arel, key)
+      join_to_update(klass.connection, stmt, key)
     else
       stmt.key = key
       stmt.take(@relation.arel.limit)
@@ -93,5 +93,10 @@ class UpdateAllScope
     return connection.type_casted_binds(binds) if connection.respond_to?(:type_casted_binds)
     return binds.map{|column, value| connection.type_cast(value, column) } if binds.first.is_a?(Array)
     return binds.map{|attr| connection.type_cast(attr.value_for_database) }
+  end
+
+  def join_to_update(connection, stmt, key)
+    return connection.join_to_update(stmt, @relation.arel) if connection.method(:join_to_update).arity == 2
+    return connection.join_to_update(stmt, @relation.arel, key)
   end
 end
