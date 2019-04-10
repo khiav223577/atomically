@@ -9,6 +9,7 @@ group :test do
   end
   gem 'simplecov'
   gem 'codeclimate-test-reporter', '~> 1.0.0'
+  gem 'i18n', '< 1.6'
   gem 'pluck_all', '>= 2.0.3'
   gem 'timecop', '~> 0.9.1'
 end
