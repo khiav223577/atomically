@@ -14,7 +14,7 @@ when 'mysql'
 when 'pg'
   require 'lib/postgresql_connection'
 else
-  fail 'no database'
+  fail 'please run test cases by: `rake test DB=mysql` or `rake test DB=pg`'
 end
 
 require 'lib/patches'
