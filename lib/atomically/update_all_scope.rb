@@ -39,7 +39,7 @@ class UpdateAllScope
 
     stmt = new_arel_update_manager
 
-    stmt.set Arel.sql(klass.sanitize_sql_for_assignment(updates_as_string))
+    stmt.set Arel.sql(klass.send(:sanitize_sql_for_assignment, updates_as_string))
     stmt.table(@relation.table)
 
     if @relation.send(:has_join_values?) || @relation.offset_value
