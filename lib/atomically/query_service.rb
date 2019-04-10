@@ -74,7 +74,7 @@ class Atomically::QueryService
     if db_is_pg?
       scope = UpdateAllScope.new(model: @model, relation: @relation.where(''))
       scope.update(*args)
-      return @klass.connection.execute("#{scope.to_sql} RETURNING id", "#{@klass} Update All").map{|s| s['id'] }
+      return @klass.connection.execute("#{scope.to_sql} RETURNING id", "#{@klass} Update All").map{|s| s['id'].to_i }
     end
 
     ids = nil
