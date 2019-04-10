@@ -42,7 +42,7 @@ class UpdateAllScope
     stmt.set Arel.sql(klass.send(:sanitize_sql_for_assignment, updates_as_string))
     stmt.table(@relation.table)
 
-    if @relation.send(:has_join_values?) || @relation.offset_value
+    if has_join_values? || @relation.offset_value
       klass.connection.join_to_update(stmt, @relation.arel, @relation.arel_attribute(@relation.primary_key))
     else
       stmt.key = @relation.arel_attribute(@relation.primary_key)
@@ -66,5 +66,12 @@ class UpdateAllScope
   def new_arel_update_manager
     return Arel::UpdateManager.new(ActiveRecord::Base) if Gem::Version.new(Arel::VERSION) < Gem::Version.new('7')
     return Arel::UpdateManager.new
+  end
+
+  def has_join_values?
+    return @relation.send(:has_join_values?) if @relation.respond_to?(:has_join_values?, true)
+    return true if @relation.joins_values.any?
+    return true if @relation.respond_to?(:left_outer_joins_values) and @relation.left_outer_joins_values.any?
+    return false
   end
 end
