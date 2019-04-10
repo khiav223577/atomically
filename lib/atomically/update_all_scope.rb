@@ -42,10 +42,11 @@ class UpdateAllScope
     stmt.set Arel.sql(klass.send(:sanitize_sql_for_assignment, updates_as_string))
     stmt.table(@relation.table)
 
+    key = arel_attribute(@relation.primary_key)
     if has_join_values? || @relation.offset_value
-      klass.connection.join_to_update(stmt, @relation.arel, @relation.arel_attribute(@relation.primary_key))
+      klass.connection.join_to_update(stmt, @relation.arel, key)
     else
-      stmt.key = @relation.arel_attribute(@relation.primary_key)
+      stmt.key = key
       stmt.take(@relation.arel.limit)
       stmt.order(*@relation.arel.orders)
       stmt.wheres = @relation.arel.constraints
@@ -73,5 +74,11 @@ class UpdateAllScope
     return true if @relation.joins_values.any?
     return true if @relation.respond_to?(:left_outer_joins_values) and @relation.left_outer_joins_values.any?
     return false
+  end
+
+  def arel_attribute(name)
+    return @relation.arel_attribute(name) if @relation.respond_to?(:arel_attribute)
+    name = klass.attribute_alias(name) if klass.attribute_alias?(name)
+    return @relation.arel_table[name]
   end
 end
