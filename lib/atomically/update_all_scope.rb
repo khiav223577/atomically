@@ -42,11 +42,10 @@ class UpdateAllScope
     stmt.set Arel.sql(klass.send(:sanitize_sql_for_assignment, updates_as_string))
     stmt.table(@relation.table)
 
-    key = arel_attribute(@relation.primary_key)
+    stmt.key = arel_attribute(@relation.primary_key)
     if has_join_values? || @relation.offset_value
-      join_to_update(klass.connection, stmt, key)
+      join_to_update(klass.connection, stmt, stmt.key)
     else
-      stmt.key = key
       stmt.take(@relation.arel.limit)
       stmt.order(*@relation.arel.orders)
       stmt.wheres = @relation.arel.constraints
