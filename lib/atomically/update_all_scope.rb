@@ -57,7 +57,7 @@ class UpdateAllScope
 
   def to_sql
     connection = klass.connection
-    sql, vars = connection.send(:to_sql_and_binds, to_arel, [])
+    sql, vars = to_sql_and_binds(connection, to_arel)
     connection.type_casted_binds(vars).each_with_index{|var, idx| sql = sql.gsub("$#{idx + 1}", connection.quote(var)) }
     return sql
   end
@@ -80,5 +80,12 @@ class UpdateAllScope
     return @relation.arel_attribute(name) if @relation.respond_to?(:arel_attribute)
     name = klass.attribute_alias(name) if klass.attribute_alias?(name)
     return @relation.arel_table[name]
+  end
+
+  def to_sql_and_binds(connection, arel_or_sql_string)
+    return connection.send(:to_sql_and_binds, arel_or_sql_string, []) if connection.respond_to?(:to_sql_and_binds, true)
+    return [arel_or_sql_string.dup.freeze, []] if !arel_or_sql_string.respond_to?(:ast)
+    sql, binds = connection.visitor.accept(arel_or_sql_string.ast, connection.collector).value
+    return [sql.freeze, binds || []]
   end
 end
