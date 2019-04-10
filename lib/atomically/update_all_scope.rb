@@ -37,7 +37,7 @@ class UpdateAllScope
       return scope.update(updates_as_string).to_update_manager
     end
 
-    stmt = Arel::UpdateManager.new
+    stmt = new_arel_update_manager
 
     stmt.set Arel.sql(klass.sanitize_sql_for_assignment(updates_as_string))
     stmt.table(@relation.table)
@@ -59,5 +59,12 @@ class UpdateAllScope
     sql, vars = connection.send(:to_sql_and_binds, to_arel, [])
     connection.type_casted_binds(vars).each_with_index{|var, idx| sql = sql.gsub("$#{idx + 1}", connection.quote(var)) }
     return sql
+  end
+
+  private
+
+  def new_arel_update_manager
+    return Arel::UpdateManager.new(ActiveRecord::Base) if Gem::Version.new(Arel::VERSION) < Gem::Version.new('7')
+    return Arel::UpdateManager.new
   end
 end
