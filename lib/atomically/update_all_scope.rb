@@ -77,7 +77,7 @@ class UpdateAllScope
 
   def arel_attribute(name)
     return @relation.arel_attribute(name) if @relation.respond_to?(:arel_attribute)
-    name = klass.attribute_alias(name) if klass.attribute_alias?(name)
+    name = klass.attribute_alias(name) if klass.respond_to?(:attribute_alias?) && klass.attribute_alias?(name) # attribute_alias? is not defined in Rails 3.
     return @relation.arel_table[name]
   end
 
