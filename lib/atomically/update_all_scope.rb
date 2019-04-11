@@ -56,8 +56,8 @@ class UpdateAllScope
 
   def to_sql
     connection = klass.connection
-    sql, vars = to_sql_and_binds(connection, to_arel)
-    type_casted_binds(connection, vars).each_with_index{|var, idx| sql = sql.gsub("$#{idx + 1}", connection.quote(var)) }
+    sql, binds = to_sql_and_binds(connection, to_arel)
+    type_casted_binds(connection, binds).each_with_index{|var, idx| sql = sql.gsub("$#{idx + 1}", connection.quote(var)) }
     return sql
   end
 
