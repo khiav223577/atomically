@@ -85,7 +85,7 @@ class UpdateAllScope
     return connection.send(:to_sql_and_binds, arel_or_sql_string, []) if connection.respond_to?(:to_sql_and_binds, true)
     return [arel_or_sql_string.dup.freeze, []] if !arel_or_sql_string.respond_to?(:ast)
     sql, binds = connection.visitor.accept(arel_or_sql_string.ast, connection.collector).value
-    return [sql.freeze, binds || []]
+    return [sql.freeze, (binds || []) + @relation.bind_values]
   end
 
   def type_casted_binds(connection, binds)
