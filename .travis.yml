@@ -3,6 +3,8 @@ language: ruby
 rvm:
   - 2.2
   - 2.5
+services:
+  - mysql
 addons:
   postgresql: "9.6"
 env:
