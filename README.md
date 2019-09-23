@@ -10,7 +10,7 @@
 
 All methods are defined in `Atomically::QueryService` instead of defining in `ActiveRecord` directly, in order not to pollute the model instance.
 
-Supports Rails 3.2, 4.2, 5.0, 5.1, 5.2.
+Supports Rails 3.2, 4.2, 5.0, 5.1, 5.2, 6.0.
 
 ## Table of contents
 
