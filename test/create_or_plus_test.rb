@@ -16,7 +16,7 @@ class CreateOrPlusTest < Minitest::Test
 
     in_sandbox do
       UserItem.atomically.create_or_plus(@columns, [[user.id, item.id, 4, 3]], [:count])
-      assert_equal [[item.id, 12, 4]], user.items.pluck(:item_id, :count, :count_in_bag)
+      assert_equal [[item.id, 12, 4]], user.user_items.pluck(:item_id, :count, :count_in_bag)
     end
   end
 
@@ -40,12 +40,12 @@ class CreateOrPlusTest < Minitest::Test
 
     in_sandbox do
       UserItem.atomically.create_or_plus(@columns, data, [:count], conflict_target: @conflict_target)
-      assert_equal [[item.id, 12, 4]], user.items.pluck(:item_id, :count, :count_in_bag)
+      assert_equal [[item.id, 12, 4]], user.user_items.pluck(:item_id, :count, :count_in_bag)
     end
 
     in_sandbox do
       UserItem.atomically.create_or_plus(@columns, data, [:count, :count_in_bag], conflict_target: @conflict_target)
-      assert_equal [[item.id, 12, 7]], user.items.pluck(:item_id, :count, :count_in_bag)
+      assert_equal [[item.id, 12, 7]], user.user_items.pluck(:item_id, :count, :count_in_bag)
     end
   end
 
@@ -56,12 +56,12 @@ class CreateOrPlusTest < Minitest::Test
 
     in_sandbox do
       UserItem.atomically.create_or_plus(@columns, data, [:count], conflict_target: @conflict_target)
-      assert_equal [[item.id, 4, 3]], user.items.pluck(:item_id, :count, :count_in_bag)
+      assert_equal [[item.id, 4, 3]], user.user_items.pluck(:item_id, :count, :count_in_bag)
     end
 
     in_sandbox do
       UserItem.atomically.create_or_plus(@columns, data, [:count, :count_in_bag], conflict_target: @conflict_target)
-      assert_equal [[item.id, 4, 3]], user.items.pluck(:item_id, :count, :count_in_bag)
+      assert_equal [[item.id, 4, 3]], user.user_items.pluck(:item_id, :count, :count_in_bag)
     end
   end
 
@@ -73,12 +73,12 @@ class CreateOrPlusTest < Minitest::Test
 
     in_sandbox do
       UserItem.atomically.create_or_plus(@columns, data, [:count], conflict_target: @conflict_target)
-      assert_equal [[item1.id, 12, 4], [item2.id, 10, 8]], user.items.pluck(:item_id, :count, :count_in_bag)
+      assert_equal [[item1.id, 12, 4], [item2.id, 10, 8]], user.user_items.pluck(:item_id, :count, :count_in_bag)
     end
 
     in_sandbox do
       UserItem.atomically.create_or_plus(@columns, data, [:count, :count_in_bag], conflict_target: @conflict_target)
-      assert_equal [[item1.id, 12, 7], [item2.id, 10, 8]], user.items.pluck(:item_id, :count, :count_in_bag)
+      assert_equal [[item1.id, 12, 7], [item2.id, 10, 8]], user.user_items.pluck(:item_id, :count, :count_in_bag)
     end
   end
 end
