@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class UpdateAllScope
+  AREL_SUPPORT_JOIN_TABLE = Gem::Version.new(Arel::VERSION) >= Gem::Version.new('10')
+
   def initialize(model: nil, relation: nil)
     @queries = []
     @relation = relation || model.class.where(id: model.id)
@@ -40,10 +42,10 @@ class UpdateAllScope
     stmt = new_arel_update_manager
 
     stmt.set Arel.sql(klass.send(:sanitize_sql_for_assignment, updates_as_string))
-    stmt.table(@relation.table)
-
+    stmt.table(stmt_table)
     stmt.key = arel_attribute(@relation.primary_key)
-    if has_join_values? || @relation.offset_value
+
+    if should_use_join_to_update?
       join_to_update(klass.connection, stmt, stmt.key)
     else
       stmt.take(@relation.arel.limit)
@@ -62,6 +64,18 @@ class UpdateAllScope
   end
 
   private
+
+  def should_use_join_to_update?
+    return false if AREL_SUPPORT_JOIN_TABLE
+    return true if has_join_values?
+    return true if @relation.offset_value
+    return false
+  end
+
+  def stmt_table
+    return @relation.table if not AREL_SUPPORT_JOIN_TABLE
+    return @relation.arel.join_sources.empty? ? @relation.table : @relation.arel.source
+  end
 
   def new_arel_update_manager
     return Arel::UpdateManager.new(ActiveRecord::Base) if Gem::Version.new(Arel::VERSION) < Gem::Version.new('7')
