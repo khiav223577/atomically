@@ -2,7 +2,7 @@
 
 require 'activerecord-import'
 require 'rails_or'
-require 'atomically/update_all_scope'
+require 'update_all_scope'
 require 'atomically/on_duplicate_sql_service'
 require 'atomically/adapter_check_service'
 require 'atomically/patches/clear_attribute_changes' if not ActiveModel::Dirty.method_defined?(:clear_attribute_changes) and not ActiveModel::Dirty.private_method_defined?(:clear_attribute_changes)
@@ -72,7 +72,7 @@ class Atomically::QueryService
 
   def update_all_and_get_ids(*args)
     if db_is_pg?
-      scope = UpdateAllScope.new(model: @model, relation: @relation.where(''))
+      scope = UpdateAllScope::UpdateAllScope.new(model: @model, relation: @relation.where(''))
       scope.update(*args)
       return @klass.connection.execute("#{scope.to_sql} RETURNING id", "#{@klass} Update All").map{|s| s['id'].to_i }
     end
@@ -135,7 +135,7 @@ class Atomically::QueryService
 
   def open_update_all_scope(&block)
     return 0 if @model == nil
-    scope = UpdateAllScope.new(model: @model)
+    scope = UpdateAllScope::UpdateAllScope.new(model: @model)
     scope.instance_exec(&block)
     return scope.do_query!
   end

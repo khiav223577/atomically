@@ -46,4 +46,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'activerecord', '>= 3'
   spec.add_dependency 'activerecord-import', '>= 0.27.0'
   spec.add_dependency 'rails_or', '>= 1.1.8'
+  spec.add_dependency 'update_all_scope', '~> 0.1.0'
 end
