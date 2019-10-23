@@ -1,5 +1,11 @@
 ## Change Log
 
+### [v1.1.0](https://github.com/khiav223577/atomically/compare/v1.0.6...v1.1.0) 2019/10/23
+- [#12](https://github.com/khiav223577/atomically/pull/12) Support pg (@khiav223577)
+- [#14](https://github.com/khiav223577/atomically/pull/14) Support Rails 6.0 (@khiav223577)
+- [#13](https://github.com/khiav223577/atomically/pull/13) Remove deprecated codeclimate-test-reporter gem (@khiav223577)
+- [#11](https://github.com/khiav223577/atomically/pull/11) Fix: Non-attribute arguments will be disallowed in Rails 6.0 (@khiav223577)
+
 ### [v1.0.6](https://github.com/khiav223577/atomically/compare/v1.0.5...v1.0.6) 2019/01/28
 - [#10](https://github.com/khiav223577/atomically/pull/10) `decrement_unsigned_counters` should be able to decrement the field to zero (@khiav223577)
 
