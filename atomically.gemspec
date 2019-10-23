@@ -39,10 +39,12 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'sqlite3', '~> 1.3'
   spec.add_development_dependency 'minitest', '~> 5.0'
   spec.add_development_dependency 'mysql2', '>= 0.3'
+  spec.add_development_dependency "pg", "~> 0.18"
   spec.add_development_dependency 'pluck_all', '>= 2.0.3'
   spec.add_development_dependency 'timecop', '~> 0.9.1'
 
   spec.add_dependency 'activerecord', '>= 3'
   spec.add_dependency 'activerecord-import', '>= 0.27.0'
   spec.add_dependency 'rails_or', '>= 1.1.8'
+  spec.add_dependency 'update_all_scope', '~> 0.1.0'
 end

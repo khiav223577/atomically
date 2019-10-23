@@ -8,8 +8,10 @@ group :test do
   when 'postgres' ; gem 'pg', '~> 0.18'
   end
   gem 'simplecov'
+  gem 'i18n', '< 1.6'
   gem 'pluck_all', '>= 2.0.3'
   gem 'timecop', '~> 0.9.1'
+  gem 'update_all_scope', '~> 0.1.0'
 end
 
 gemspec path: '../'

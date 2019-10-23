@@ -2,20 +2,24 @@
 
 require 'activerecord-import'
 require 'rails_or'
-require 'atomically/update_all_scope'
+require 'update_all_scope'
+require 'atomically/on_duplicate_sql_service'
+require 'atomically/adapter_check_service'
 require 'atomically/patches/clear_attribute_changes' if not ActiveModel::Dirty.method_defined?(:clear_attribute_changes) and not ActiveModel::Dirty.private_method_defined?(:clear_attribute_changes)
 require 'atomically/patches/none' if not ActiveRecord::Base.respond_to?(:none)
 require 'atomically/patches/from' if Gem::Version.new(ActiveRecord::VERSION::STRING) < Gem::Version.new('4.0.0')
 
 class Atomically::QueryService
+  DEFAULT_CONFLICT_TARGETS = [:id].freeze
+
   def initialize(klass, relation: nil, model: nil)
     @klass = klass
     @relation = relation || @klass
     @model = model
   end
 
-  def create_or_plus(columns, data, update_columns)
-    @klass.import(columns, data, on_duplicate_key_update: on_duplicate_key_plus_sql(update_columns))
+  def create_or_plus(columns, data, update_columns, conflict_target: DEFAULT_CONFLICT_TARGETS)
+    @klass.import(columns, data, on_duplicate_key_update: on_duplicate_key_plus_sql(update_columns, conflict_target))
   end
 
   def pay_all(hash, update_columns, primary_key: :id) # { id => pay_count }
@@ -30,8 +34,13 @@ class Atomically::QueryService
     end
 
     raw_when_sql = hash.map{|id, pay_count| "WHEN #{sanitize(id)} THEN #{sanitize(-pay_count)}" }.join("\n")
+    no_var_in_sql = true if update_columns.size == 1 or db_is_pg?
     update_sqls = update_columns.map.with_index do |column, idx|
-      value = idx == 0 ? "(@change := \nCASE #{quote_column(primary_key)}\n#{raw_when_sql}\nEND)" : '@change'
+      if no_var_in_sql
+        value = "(\nCASE #{quote_column(primary_key)}\n#{raw_when_sql}\nEND)"
+      else
+        value = idx == 0 ? "(@change := \nCASE #{quote_column(primary_key)}\n#{raw_when_sql}\nEND)" : '@change'
+      end
       next "#{column} = #{column} + #{value}"
     end
 
@@ -62,8 +71,14 @@ class Atomically::QueryService
   end
 
   def update_all_and_get_ids(*args)
+    if db_is_pg?
+      scope = UpdateAllScope::UpdateAllScope.new(model: @model, relation: @relation.where(''))
+      scope.update(*args)
+      return @klass.connection.execute("#{scope.to_sql} RETURNING id", "#{@klass} Update All").map{|s| s['id'].to_i }
+    end
+
     ids = nil
-    id_column = "#{@klass.quoted_table_name}.#{quote_column(:id)}"
+    id_column = quote_column_with_table(:id)
     @klass.transaction do
       @relation.connection.execute('SET @ids := NULL')
       @relation.where("(SELECT @ids := CONCAT_WS(',', #{id_column}, @ids))").update_all(*args) # 撈出有真的被更新的 id，用逗號串在一起
@@ -74,8 +89,25 @@ class Atomically::QueryService
 
   private
 
-  def on_duplicate_key_plus_sql(columns)
-    columns.lazy.map(&method(:quote_column)).map{|s| "#{s} = #{s} + VALUES(#{s})" }.force.join(', ')
+  def db_is_pg?
+    Atomically::AdapterCheckService.new(@klass).pg?
+  end
+
+  def db_is_mysql?
+    Atomically::AdapterCheckService.new(@klass).mysql?
+  end
+
+  def on_duplicate_key_plus_sql(columns, conflict_target)
+    service = Atomically::OnDuplicateSqlService.new(@klass, columns)
+    return service.mysql_quote_columns_for_plus.join(', ') if db_is_mysql?
+    return {
+      conflict_target: conflict_target,
+      columns: service.pg_quote_columns_for_plus.join(', ')
+    }
+  end
+
+  def quote_column_with_table(column)
+    "#{@klass.quoted_table_name}.#{quote_column(column)}"
   end
 
   def quote_column(column)
@@ -103,7 +135,7 @@ class Atomically::QueryService
 
   def open_update_all_scope(&block)
     return 0 if @model == nil
-    scope = UpdateAllScope.new(model: @model)
+    scope = UpdateAllScope::UpdateAllScope.new(model: @model)
     scope.instance_exec(&block)
     return scope.do_query!
   end

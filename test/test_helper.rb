@@ -11,10 +11,10 @@ require 'minitest/autorun'
 case ENV['DB']
 when 'mysql'
   require 'lib/mysql2_connection'
-# when 'pg'
-#   require 'lib/postgresql_connection'
+when 'pg'
+  require 'lib/postgresql_connection'
 else
-  fail 'no database'
+  fail 'please run test cases by: `rake test DB=mysql` or `rake test DB=pg`'
 end
 
 require 'lib/patches'
