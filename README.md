@@ -10,7 +10,8 @@
 
 All methods are defined in `Atomically::QueryService` instead of defining in `ActiveRecord` directly, in order not to pollute the model instance.
 
-Supports Rails 3.2, 4.2, 5.0, 5.1, 5.2, 6.0.
+- Supports Rails 3.2, 4.2, 5.0, 5.1, 5.2, 6.0.
+- Supports PostgreSQL, MySQL.
 
 ## Table of contents
 
@@ -51,7 +52,7 @@ Note: ActiveRecord validations and callbacks will **NOT** be triggered when call
 ### create_or_plus _(columns, values, on_duplicate_update_columns, conflict_target:)_
 
 Import an array of records. When key is duplicate, plus the old value with new value.
-It is useful to add `items` to `user` when `user_items` may not exist.
+It is useful to add `items` to `user` when `user_items` may not exist. (Let `User` and `Item` are many-to-many relationship.)
 
 #### Parameters
 
@@ -62,6 +63,21 @@ It is useful to add `items` to `user` when `user_items` may not exist.
 #### Example
 
 ```rb
+class User < ApplicationRecord
+  has_many :user_items
+  has_many :items, through: :user_items
+end
+
+class UserItem < ApplicationRecord
+  belongs_to :user
+  belongs_to :item
+end
+
+class Item < ApplicationRecord
+  has_many :user_items
+  has_many :users, through: :user_items
+end
+
 user = User.find(2)
 item1 = Item.find(1)
 item2 = Item.find(2)
@@ -70,22 +86,22 @@ item2 = Item.find(2)
 ```rb
 columns = [:user_id, :item_id, :quantity]
 values = [[user.id, item1.id, 3], [user.id, item2.id, 2]]
-on_duplicate_update_columns = [:quantity]
 
 # mysql
-UserItem.atomically.create_or_plus(columns, values, on_duplicate_update_columns)
+UserItem.atomically.create_or_plus(columns, values, [:quantity])
 
 # pg
-UserItem.atomically.create_or_plus(columns, values, on_duplicate_update_columns, conflict_target: [:user_id, :item_id])
+UserItem.atomically.create_or_plus(columns, values, [:quantity], conflict_target: [:user_id, :item_id])
 ```
 
 before
 
-![before](https://user-images.githubusercontent.com/4011729/48998921-ff430600-f18f-11e8-8eeb-e8a71bbf5802.png)
+![before](https://user-images.githubusercontent.com/4011729/67365648-95e89480-f5a4-11e9-8147-279385c6f442.png)
 
 after
 
-![image](https://user-images.githubusercontent.com/4011729/48999092-8d1ef100-f190-11e8-8372-86e2e99cbe08.png)
+![after](https://user-images.githubusercontent.com/4011729/67365653-97b25800-f5a4-11e9-8314-8e6ff8d2cd61.png)
+
 
 #### SQL queries
 
@@ -94,33 +110,35 @@ after
 INSERT INTO `user_items` (`user_id`,`item_id`,`quantity`,`created_at`,`updated_at`) VALUES
   (2,1,3,'2018-11-27 03:44:25','2018-11-27 03:44:25'),
   (2,2,2,'2018-11-27 03:44:25','2018-11-27 03:44:25')
-ON DUPLICATE KEY UPDATE 
+ON DUPLICATE KEY UPDATE
   `quantity` = `quantity` + VALUES(`quantity`)
 
 # pg
-INSERT INTO "user_items" ("user_id","item_id","quantity","created_at","updated_at") VALUES 
+INSERT INTO "user_items" ("user_id","item_id","quantity","created_at","updated_at") VALUES
   (2,1,3,'2018-11-27 03:44:25.847909','2018-11-27 03:44:25.847909'),
-  (2,2,2,'2018-11-27 03:44:25.847909','2018-11-27 03:44:25.847909') 
-ON CONFLICT (user_id, item_id) DO UPDATE SET 
+  (2,2,2,'2018-11-27 03:44:25.847909','2018-11-27 03:44:25.847909')
+ON CONFLICT (user_id, item_id) DO UPDATE SET
   "quantity" = "user_items"."quantity" + excluded."quantity"  RETURNING "id"
 ```
 
 ---
 ### pay_all _(hash, update_columns, primary_key: :id)_
 
-Reduce the quantity of items and return how many rows and updated if all of them is enough.
+Reduce the quantity of items and return how many rows and updated if all of them are enough.
 Do nothing and return zero if any of them is not enough.
 
 #### Parameters
 
   - `hash` - A hash contains the id of the models as keys and the amount to update the field by as values.
   - `update_columns` - The column that will be updated.
-  - `primary_key` - Specify the column that `id`(the key of hash) refer to.
+  - `primary_key` - Specify the column that `id`(the key of hash) refers to.
 
 #### Example
 
 ```rb
 user.user_items.atomically.pay_all({ item1.id => 4, item2.id => 3 }, [:quantity], primary_key: :item_id)
+# => 2 (if success)
+# => 0 (if some aren't enough)
 ```
 
 #### SQL queries
@@ -157,21 +175,21 @@ Behaves like [ActiveRecord::Relation#update_all](https://apidock.com/rails/Activ
 
 #### Examples
 ```rb
-User.where(id: [1, 2]).atomically.update_all(2, name: '')
-# => 2
+User.where(id: [5, 6]).atomically.update_all(2, name: '')
+# => 2 (success)
 
-User.where(id: [1, 2, 3]).atomically.update_all(2, name: '')
-# => 0
+User.where(id: [7, 8, 9]).atomically.update_all(2, name: '')
+# => 0 (fail)
 ```
 
 #### SQL queries
 
 ```sql
-# User.where(id: [1, 2, 3]).atomically.update_all(2, name: '')
-UPDATE `users` SET `users`.`name` = '' WHERE `users`.`id` IN (1, 2, 3) AND (
+# User.where(id: [7, 8, 9]).atomically.update_all(2, name: '')
+UPDATE `users` SET `users`.`name` = '' WHERE `users`.`id` IN (7, 8, 9) AND (
   (
     SELECT COUNT(*) FROM (
-      SELECT `users`.* FROM `users` WHERE `users`.`id` IN (1, 2, 3)
+      SELECT `users`.* FROM `users` WHERE `users`.`id` IN (7, 8, 9)
     ) subquery
   ) = 2
 )
@@ -180,7 +198,7 @@ UPDATE `users` SET `users`.`name` = '' WHERE `users`.`id` IN (1, 2, 3) AND (
 ---
 ### update_all_and_get_ids _(updates)_
 
-Behaves like [ActiveRecord::Relation#update_all](https://apidock.com/rails/ActiveRecord/Relation/update_all), but return the ids array of updated records instead of the number of updated records.
+Behaves like [ActiveRecord::Relation#update_all](https://apidock.com/rails/ActiveRecord/Relation/update_all), but return an array of updated records' id instead of the number of updated records.
 
 
 #### Parameters
@@ -191,23 +209,32 @@ Behaves like [ActiveRecord::Relation#update_all](https://apidock.com/rails/Activ
 
 ```rb
 User.where(account: ['moon', 'wolf']).atomically.update_all_and_get_ids('money = money + 1')
-# => [254, 371]
+# => [254, 371] (array of updated user ids)
+
+User.where(account: ['moon', 'wolf']).update_all('money = money + 1')
+# => 2 (the number of updated records)
 ```
 
 #### SQL queries
 
 ```sql
+# mysql
 BEGIN
   SET @ids := NULL
   UPDATE `users` SET money = money + 1 WHERE `users`.`account` IN ('moon', 'wolf') AND ((SELECT @ids := CONCAT_WS(',', `users`.`id`, @ids)))
   SELECT @ids FROM DUAL
 COMMIT
+
+# pg
+UPDATE 'users' SET money = money + 1 RETURNING id
 ```
 
 ---
 ### update _(attrs, from: :not_set)_
 
-Updates the attributes of the model from the passed-in hash and saves the record. The difference between this method and [ActiveRecord#update](https://apidock.com/rails/ActiveRecord/Persistence/update) is that it will add extra WHERE conditions to prevent race condition.
+Updates the attributes of the model from the passed-in hash and saves the record. Return true if update successfully, false otherwise. This method can detect race condition and make sure the model is updated only once.
+
+The difference between this method and [ActiveRecord#update](https://apidock.com/rails/ActiveRecord/Persistence/update) is that it will add extra WHERE conditions to prevent race condition.
 
 #### Parameters
 
@@ -228,11 +255,30 @@ class Arena < ApplicationRecord
 end
 ```
 
+Let `arena.closed_at` be nil.
+
+```rb
+arena.atomically_close!
+# => true (if success)
+# => false (if race condition occurs)
+```
+
+The return value can be used to prevent race condition and make sure some piece of code is executed once.
+
+```rb
+if arena.atomically_close!
+  # Only one request can pass this check and excete the code here.
+  # You can send rewards, calculate ranking, or fire background job here.
+  # No need to worry about being invoked multiple times.
+  do_something
+end
+```
+
 #### SQL queries
+
 
 ```sql
 # arena.atomically_close!
-# (let arena.closed_at to be nil)
 UPDATE `arenas` SET `arenas`.`closed_at` = '2018-11-27 03:44:25', `updated_at` = '2018-11-27 03:44:25'
 WHERE `arenas`.`id` = 1752 AND `arenas`.`closed_at` IS NULL
 
@@ -260,12 +306,12 @@ user.money
 # => 100
 
 user.atomically.decrement_unsigned_counters(money: 10)
-# => true
+# => true (success)
 user.reload.money
 # => 90
 
 user.atomically.decrement_unsigned_counters(money: 999)
-# => false
+# => false (fail)
 user.reload.money
 # => 90
 ```
