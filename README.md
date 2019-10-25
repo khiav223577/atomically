@@ -263,11 +263,11 @@ arena.atomically_close!
 # => false (if race condition occurs)
 ```
 
-The return value can be used to prevent race condition and make sure some piece of code is executed once.
+The return value can be used to prevent race condition and make sure some piece of code is executed only once.
 
 ```rb
 if arena.atomically_close!
-  # Only one request can pass this check and excete the code here.
+  # Only one request can pass this check and execute the code here.
   # You can send rewards, calculate ranking, or fire background job here.
   # No need to worry about being invoked multiple times.
   do_something
