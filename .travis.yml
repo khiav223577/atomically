@@ -23,7 +23,10 @@ gemfile:
   - gemfiles/6.0.makara.gemfile
 matrix:
   include:
-    - env: DB=makara
+    - env: DB=makara_mysql
+      gemfile: gemfiles/6.0.makara.gemfile
+      rvm: 2.6
+    - env: DB=makara_pg
       gemfile: gemfiles/6.0.makara.gemfile
       rvm: 2.6
   exclude:
