@@ -20,7 +20,12 @@ gemfile:
   - gemfiles/5.1.gemfile
   - gemfiles/5.2.gemfile
   - gemfiles/6.0.gemfile
+  - gemfiles/6.0.makara.gemfile
 matrix:
+  include:
+    - env: DB=makara
+      gemfile: gemfiles/6.0.makara.gemfile
+      rvm: 2.6
   exclude:
     - gemfile: gemfiles/3.2.gemfile
       rvm: 2.6
