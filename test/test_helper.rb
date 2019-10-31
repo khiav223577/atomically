@@ -9,12 +9,19 @@ require 'atomically'
 require 'minitest/autorun'
 
 case ENV['DB']
-when 'mysql'
-  require 'lib/mysql2_connection'
-when 'pg'
-  require 'lib/postgresql_connection'
+when 'makara_mysql' ; require 'lib/makara_mysql_connection'
+when 'makara_pg'    ; require 'lib/makara_pg_connection'
+when 'mysql'        ; require 'lib/mysql2_connection'
+when 'pg'           ; require 'lib/postgresql_connection'
 else
-  fail 'please run test cases by: `rake test DB=mysql` or `rake test DB=pg`'
+  fail [
+    'Unknown DB',
+    'Please run test cases by one of the following: ',
+    '- rake test DB=mysql',
+    '- rake test DB=pg',
+    '- rake test DB=makara_mysql',
+    '- rake test DB=makara_pg',
+  ].join("\n")
 end
 
 require 'lib/patches'
