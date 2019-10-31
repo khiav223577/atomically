@@ -34,7 +34,7 @@ class Atomically::QueryService
     end
 
     raw_when_sql = hash.map{|id, pay_count| "WHEN #{sanitize(id)} THEN #{sanitize(-pay_count)}" }.join("\n")
-    no_var_in_sql = true if update_columns.size == 1 or db_is_pg?
+    no_var_in_sql = true if update_columns.size == 1 or adapter_check_service.pg?
     update_sqls = update_columns.map.with_index do |column, idx|
       if no_var_in_sql
         value = "(\nCASE #{quote_column(primary_key)}\n#{raw_when_sql}\nEND)"
@@ -71,7 +71,7 @@ class Atomically::QueryService
   end
 
   def update_all_and_get_ids(*args)
-    if db_is_pg?
+    if adapter_check_service.pg?
       scope = UpdateAllScope::UpdateAllScope.new(model: @model, relation: @relation.where(''))
       scope.update(*args)
       return @klass.connection.execute("#{scope.to_sql} RETURNING id", "#{@klass} Update All").map{|s| s['id'].to_i }
@@ -89,17 +89,13 @@ class Atomically::QueryService
 
   private
 
-  def db_is_pg?
-    Atomically::AdapterCheckService.new(@klass).pg?
-  end
-
-  def db_is_mysql?
-    Atomically::AdapterCheckService.new(@klass).mysql?
+  def adapter_check_service
+    @adapter_check_service ||= Atomically::AdapterCheckService.new(@klass)
   end
 
   def on_duplicate_key_plus_sql(columns, conflict_target)
     service = Atomically::OnDuplicateSqlService.new(@klass, columns)
-    return service.mysql_quote_columns_for_plus.join(', ') if db_is_mysql?
+    return service.mysql_quote_columns_for_plus.join(', ') if adapter_check_service.mysql?
     return {
       conflict_target: conflict_target,
       columns: service.pg_quote_columns_for_plus.join(', ')
