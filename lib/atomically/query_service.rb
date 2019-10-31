@@ -90,11 +90,13 @@ class Atomically::QueryService
   private
 
   def db_is_pg?
-    Atomically::AdapterCheckService.new(@klass).pg?
+    service = Atomically::AdapterCheckService.new(@klass)
+    return service.pg? || service.makara_pg?
   end
 
   def db_is_mysql?
-    Atomically::AdapterCheckService.new(@klass).mysql?
+    service = Atomically::AdapterCheckService.new(@klass)
+    return service.mysql? || service.makara_mysql?
   end
 
   def on_duplicate_key_plus_sql(columns, conflict_target)
