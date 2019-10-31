@@ -3,10 +3,10 @@ source 'https://rubygems.org'
 gem 'activerecord', '~> 6.0.0'
 
 group :test do
-  case ENV['DB']
-  when 'mysql'    ; gem 'mysql2', '0.5.1'
-  when 'postgres' ; gem 'pg', '~> 0.18'
-  end
+
+  gem 'mysql2', '0.5.1' if ENV['DB'].in?(['mysql', 'makara_mysql'])
+  gem 'pg', '~> 0.18' if ENV['DB'].in?(['pg', 'makara_pg'])
+  gem 'makara', '~> 0.4.1' if ENV['DB'].in?(['makara_mysql', 'makara_pg'])
   gem 'simplecov'
   gem 'pluck_all', '>= 2.0.4'
   gem 'timecop', '~> 0.9.1'
