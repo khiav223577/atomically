@@ -5,22 +5,26 @@ class Atomically::AdapterCheckService
   end
 
   def pg?
-    return false if not defined?(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
-    return @klass.connection.is_a?(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
+    possible_pg_klasses.any?{|s| @klass.connection.is_a?(s) }
   end
 
   def mysql?
-    return false if not defined?(ActiveRecord::ConnectionAdapters::Mysql2Adapter)
-    return @klass.connection.is_a?(ActiveRecord::ConnectionAdapters::Mysql2Adapter)
+    possible_mysql_klasses.any?{|s| @klass.connection.is_a?(s) }
   end
 
-  def makara_mysql?
-    return false if not defined?(ActiveRecord::ConnectionAdapters::MakaraMysql2Adapter)
-    return @klass.connection.is_a?(ActiveRecord::ConnectionAdapters::MakaraMysql2Adapter)
+  private
+
+  def possible_pg_klasses
+    result = []
+    result << ActiveRecord::ConnectionAdapters::PostgreSQLAdapter if defined?(ActiveRecord::ConnectionAdapters::PostgreSQLAdapter)
+    result << ActiveRecord::ConnectionAdapters::MakaraPostgreSQLAdapter if defined?(ActiveRecord::ConnectionAdapters::MakaraPostgreSQLAdapter)
+    return result
   end
 
-  def makara_pg?
-    return false if not defined?(ActiveRecord::ConnectionAdapters::MakaraPostgreSQLAdapter)
-    return @klass.connection.is_a?(ActiveRecord::ConnectionAdapters::MakaraPostgreSQLAdapter)
+  def possible_mysql_klasses
+    result = []
+    result << ActiveRecord::ConnectionAdapters::Mysql2Adapter if defined?(ActiveRecord::ConnectionAdapters::Mysql2Adapter)
+    result << ActiveRecord::ConnectionAdapters::MakaraMysql2Adapter if defined?(ActiveRecord::ConnectionAdapters::MakaraMysql2Adapter)
+    return result
   end
 end
