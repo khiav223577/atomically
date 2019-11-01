@@ -1,7 +1,13 @@
 ## Change Log
 
+### [upcoming](https://github.com/khiav223577/atomically/compare/v1.1.1...HEAD) 2019/11/01
+- [#17](https://github.com/khiav223577/atomically/pull/17) specify gem versions by ENV['DB'] (@khiav223577)
+
+### [v1.1.1](https://github.com/khiav223577/atomically/compare/v1.1.0...v1.1.1) 2019/11/01
+- [#16](https://github.com/khiav223577/atomically/pull/16) Fix: `create_or_plus` is broken when using `makara` adapter (@khiav223577)
+
 ### [v1.1.0](https://github.com/khiav223577/atomically/compare/v1.0.6...v1.1.0) 2019/10/23
-- [#12](https://github.com/khiav223577/atomically/pull/12) Support pg (@khiav223577)
+- [#12](https://github.com/khiav223577/atomically/pull/12) Support PostgreSQL (@khiav223577)
 - [#14](https://github.com/khiav223577/atomically/pull/14) Support Rails 6.0 (@khiav223577)
 - [#13](https://github.com/khiav223577/atomically/pull/13) Remove deprecated codeclimate-test-reporter gem (@khiav223577)
 - [#11](https://github.com/khiav223577/atomically/pull/11) Fix: Non-attribute arguments will be disallowed in Rails 6.0 (@khiav223577)
