@@ -10,8 +10,10 @@
 
 All methods are defined in `Atomically::QueryService` instead of defining in `ActiveRecord` directly, in order not to pollute the model instance.
 
-- Supports Rails 3.2, 4.2, 5.0, 5.1, 5.2, 6.0.
-- Supports PostgreSQL, MySQL.
+## Supports
+- Ruby 2.2 ~ 2.7
+- Rails 3.2, 4.2, 5.0, 5.1, 5.2, 6.0
+- MySQL, PostgreSQL
 
 ## Table of contents
 
