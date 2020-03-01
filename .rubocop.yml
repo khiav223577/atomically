@@ -357,7 +357,7 @@ Rails/TimeZone:
   Description: 'Checks the correct usage of time zone aware methods.'
   StyleGuide: 'https://github.com/bbatsov/rails-style-guide#time'
   Reference: 'http://danilenko.org/2012/7/6/rails_timezones'
-  Enabled: true
+  Enabled: false
 
 Rails/Validation:
   Description: 'Use validates :attribute, hash of validations.'
