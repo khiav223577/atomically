@@ -3,9 +3,9 @@ source 'https://rubygems.org'
 gem 'activerecord', '~> 5.1.0'
 
 group :test do
-  gem 'mysql2', '0.3.21' if ['mysql', 'makara_mysql'].include?(ENV['DB'])
-  gem 'pg', '~> 0.18' if ['pg', 'makara_pg'].include?(ENV['DB'])
-  gem 'makara', '~> 0.4.1' if ['makara_mysql', 'makara_pg'].include?(ENV['DB'])
+  gem 'mysql2', '0.3.21' if %w[mysql makara_mysql].include?(ENV['DB'])
+  gem 'pg', '~> 0.18' if %w[pg makara_pg].include?(ENV['DB'])
+  gem 'makara', '~> 0.4.1' if %w[makara_mysql makara_pg].include?(ENV['DB'])
   gem 'simplecov'
   gem 'i18n', '< 1.6'
   gem 'pluck_all', '>= 2.0.3'

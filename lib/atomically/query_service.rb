@@ -98,7 +98,7 @@ class Atomically::QueryService
     return service.mysql_quote_columns_for_plus.join(', ') if adapter_check_service.mysql?
     return {
       conflict_target: conflict_target,
-      columns: service.pg_quote_columns_for_plus.join(', ')
+      columns: service.pg_quote_columns_for_plus.join(', '),
     }
   end
 

@@ -39,7 +39,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'sqlite3', '~> 1.3'
   spec.add_development_dependency 'minitest', '~> 5.0'
   spec.add_development_dependency 'mysql2', '>= 0.3'
-  spec.add_development_dependency "pg", "~> 0.18"
+  spec.add_development_dependency 'pg', '~> 0.18'
   spec.add_development_dependency 'pluck_all', '>= 2.0.3'
   spec.add_development_dependency 'timecop', '~> 0.9.1'
 
