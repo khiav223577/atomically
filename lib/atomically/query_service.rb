@@ -53,7 +53,7 @@ class Atomically::QueryService
 
   def update(attrs, from: :not_set)
     success = update_and_return_number_of_updated_rows(attrs, from) == 1
-    assign_without_changes(attrs) if success
+    assign_without_changes(@model.changes.transform_values(&:second).merge(attrs)) if success
     return success
   end
 
