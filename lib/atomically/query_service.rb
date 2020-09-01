@@ -118,12 +118,17 @@ class Atomically::QueryService
     query.where("(#{@klass.from(query.where('')).select('COUNT(*)').to_sql}) = ?", expected_size)
   end
 
-  def update_and_return_number_of_updated_rows(attrs, from)
+  def update_and_return_number_of_updated_rows(attrs, from_value)
     model = @model
     return open_update_all_scope do
       update(updated_at: Time.now)
+
+      model.changes.each do |column, (_old_value, new_value)|
+        update(column => new_value)
+      end
+
       attrs.each do |column, value|
-        old_value = (from == :not_set ? model[column] : from)
+        old_value = (from_value == :not_set ? model[column] : from_value)
         where(column => old_value).update(column => value) if old_value != value
       end
     end
