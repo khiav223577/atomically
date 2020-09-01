@@ -21,6 +21,22 @@ class UpdateTest < Minitest::Test
     end
   end
 
+  def test_update_attribute_when_there_are_changes
+    in_sandbox do
+      Timecop.freeze(@future) do
+        @item.desc = 'unknown weapon.'
+        assert_equal true, @item.atomically.update(name: 'unknown')
+
+        new_item = Item.find_by(id: @item.id)
+        assert_equal 'unknown', @item.name
+        assert_equal 'unknown', new_item.name
+        assert_equal 'unknown weapon.', @item.desc
+        assert_equal 'unknown weapon.', new_item.desc
+        assert_in_delta @item.updated_at, new_item.updated_at, 1.day
+      end
+    end
+  end
+
   def test_update_attribute_with_race_condition
     in_sandbox do
       Timecop.freeze(@future) do
