@@ -1,6 +1,8 @@
 ## Change Log
 
-### [upcoming](https://github.com/khiav223577/atomically/compare/v1.1.1...HEAD) 2019/11/01
+### [v1.1.2](https://github.com/khiav223577/atomically/compare/v1.1.1...v1.1.2) 2020/09/01
+- [#19](https://github.com/khiav223577/atomically/pull/19) Fix: changed attributes are not updated when calling `atomically.update` (@khiav223577)
+- [#18](https://github.com/khiav223577/atomically/pull/18) Support Ruby 2.7 (@khiav223577)
 - [#17](https://github.com/khiav223577/atomically/pull/17) specify gem versions by ENV['DB'] (@khiav223577)
 
 ### [v1.1.1](https://github.com/khiav223577/atomically/compare/v1.1.0...v1.1.1) 2019/11/01
