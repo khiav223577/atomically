@@ -53,7 +53,12 @@ class Atomically::QueryService
 
   def update(attrs, from: :not_set)
     success = update_and_return_number_of_updated_rows(attrs, from) == 1
-    assign_without_changes(attrs) if success
+
+    if success
+      assign_without_changes(attrs)
+      @model.send(:clear_attribute_changes, @model.changes.keys)
+    end
+
     return success
   end
 
@@ -118,12 +123,17 @@ class Atomically::QueryService
     query.where("(#{@klass.from(query.where('')).select('COUNT(*)').to_sql}) = ?", expected_size)
   end
 
-  def update_and_return_number_of_updated_rows(attrs, from)
+  def update_and_return_number_of_updated_rows(attrs, from_value)
     model = @model
     return open_update_all_scope do
       update(updated_at: Time.now)
+
+      model.changes.each do |column, (_old_value, new_value)|
+        update(column => new_value)
+      end
+
       attrs.each do |column, value|
-        old_value = (from == :not_set ? model[column] : from)
+        old_value = (from_value == :not_set ? model[column] : from_value)
         where(column => old_value).update(column => value) if old_value != value
       end
     end
