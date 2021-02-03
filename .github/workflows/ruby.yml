@@ -99,13 +99,6 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-    - name: Reinstall mysql2 adapter with options
-      if: matrix.db == 'mysql' || matrix.db == 'makara_mysql'
-      run: |
-        which openssl
-        sudo apt-get install libmysqlclient-dev
-        gem uninstall mysql2
-        gem install mysql2
     - name: Run tests
       run: bundle exec rake
     - name: Publish code coverage
