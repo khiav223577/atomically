@@ -93,6 +93,11 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+    - name: reinstall
+      if: matrix.db == 'mysql' || matrix.db == 'makara_mysql'
+      run: |
+        sudo apt remove libmysqlclient-dev
+        sudo apt install libmariadbclient-dev
     - name: Setup Ruby
       uses: ruby/setup-ruby@v1
       with:
