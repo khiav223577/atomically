@@ -23,7 +23,8 @@ jobs:
           - mysql
           - pg
         ruby:
-          - 2.2
+          # - 2.2 # skip Ruby 2.2 since mysql2 raises segmentation fault at 0x0000000000000000
+          # See: https://github.community/t/mysql2-segmentation-fault-at-0x0000000000000000/159283
           - 2.6
           - 2.7
         gemfile:
