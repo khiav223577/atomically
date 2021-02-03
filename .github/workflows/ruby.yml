@@ -69,7 +69,12 @@ jobs:
           MYSQL_DATABASE: github_actions_test
         ports:
           - 3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+        # Set health checks to wait until mysql has started
+        options: >-
+          --health-cmd "mysqladmin ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
       postgres:
         image: postgres:9.6
         env:
@@ -78,8 +83,12 @@ jobs:
           POSTGRES_DB: github_actions_test
         ports:
           - 5432:5432
-        # needed because the postgres container does not provide a healthcheck
-        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
 
     steps:
     - name: Checkout
