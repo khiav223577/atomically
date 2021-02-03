@@ -63,7 +63,7 @@ jobs:
       mysql:
         image: mysql:5.6
         env:
-          MYSQL_ROOT_PASSWORD: password
+          MYSQL_ROOT_PASSWORD: root_password
           MYSQL_USER: developer
           MYSQL_PASSWORD: developer_password
           MYSQL_DATABASE: github_actions_test
