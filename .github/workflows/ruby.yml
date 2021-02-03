@@ -61,7 +61,6 @@ jobs:
 
     services:
       mysql:
-        if: matrix.db == 'mysql' || matrix.db == 'makara_mysql'
         image: mysql:5.7
         env:
           MYSQL_USER: developer
@@ -71,7 +70,6 @@ jobs:
           - 3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
       postgres:
-        if: matrix.db == 'pg' || matrix.db == 'makara_pg'
         image: postgres:9.6
         env:
           POSTGRES_USER: developer
