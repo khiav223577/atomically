@@ -8,6 +8,7 @@ end
 
 ActiveRecord::Base.establish_connection(
   'adapter'  => 'mysql2',
+  'host'     => 'mysql',
   'database' => 'github_actions_test',
   'username' => 'developer',
   'password' => 'developer_password',
