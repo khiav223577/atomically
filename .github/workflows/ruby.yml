@@ -67,6 +67,9 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+    - name: Shutdown Ubuntu MySQL (SUDO)
+      if: matrix.db == 'mysql' || matrix.db == 'makara_mysql'
+      run: sudo service mysql stop # Shutdown the Default MySQL, "sudo" is necessary, please not remove it
     - name: Setup MySQL
       if: matrix.db == 'mysql' || matrix.db == 'makara_mysql'
       uses: mirromutth/mysql-action@v1.1
