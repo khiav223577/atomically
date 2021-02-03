@@ -82,6 +82,7 @@ jobs:
       if: matrix.db == 'pg' || matrix.db == 'makara_pg'
       uses: harmon758/postgresql-action@v1
       with:
+        postgresql version: '9.6'
         postgresql db: 'github_actions_test'
         postgresql user: 'developer'
         postgresql password: 'developer_password'
