@@ -19,6 +19,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        db:
+          - mysql
+          - pg
         ruby:
           - 2.2
           - 2.6
@@ -39,8 +42,22 @@ jobs:
             ruby: 2.7
           - gemfile: 6.0.gemfile
             ruby: 2.2
+        include:
+          - db: makara_mysql
+            gemfile: 6.0.gemfile
+            rvm: 2.6
+          - db: makara_pg
+            gemfile: 6.0.gemfile
+            ruby: 2.6
+          - db: makara_mysql
+            gemfile: 6.0.gemfile
+            ruby: 2.7
+          - db: makara_pg
+            gemfile: 6.0.gemfile
+            ruby: 2.7
     env:
       BUNDLE_GEMFILE: "gemfiles/${{ matrix.gemfile }}"
+      DB: "${{ matrix.db }}"
 
     steps:
     - name: Checkout
@@ -50,6 +67,16 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+    - name: Setup MySQL
+      if: matrix.db == 'mysql' || matrix.db == 'makara_mysql'
+      uses: mirromutth/mysql-action@v1.1
+      with:
+        mysql database: 'github_actions_test'
+    - name: Setup PostgreSQL
+      if: matrix.db == 'pg' || matrix.db == 'makara_pg'
+      uses: harmon758/postgresql-action@v1
+      with:
+        postgresql db: 'github_actions_test'
     - name: Run tests
       run: bundle exec rake
     - name: Publish code coverage

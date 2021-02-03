@@ -4,7 +4,7 @@ require 'makara'
 
 ActiveRecord::Base.establish_connection(
   'adapter'  => 'mysql2_makara',
-  'database' => 'travis_ci_test',
+  'database' => 'github_actions_test',
   'username' => 'root',
   'makara'   => {
     'connections' => [
