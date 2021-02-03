@@ -6,7 +6,7 @@ group :test do
   gem 'mysql2', '0.5.1' if %w[mysql makara_mysql].include?(ENV['DB'])
   gem 'pg', '~> 0.18' if %w[pg makara_pg].include?(ENV['DB'])
   gem 'makara', '~> 0.4.1' if %w[makara_mysql makara_pg].include?(ENV['DB'])
-  gem 'simplecov'
+  gem 'simplecov', '< 0.18'
   gem 'pluck_all', '>= 2.0.4'
   gem 'timecop', '~> 0.9.1'
   gem 'update_all_scope', '~> 0.1.0'
