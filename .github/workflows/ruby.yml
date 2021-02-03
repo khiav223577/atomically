@@ -45,7 +45,7 @@ jobs:
         include:
           - db: makara_mysql
             gemfile: 6.0.gemfile
-            rvm: 2.6
+            ruby: 2.6
           - db: makara_pg
             gemfile: 6.0.gemfile
             ruby: 2.6
