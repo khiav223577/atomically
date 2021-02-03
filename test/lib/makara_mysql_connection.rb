@@ -7,7 +7,7 @@ ActiveRecord::Base.establish_connection(
   'database' => 'github_actions_test',
   'username' => 'developer',
   'password' => 'developer_password',
-  'host'     => 'localhost',
+  'host'     => '127.0.0.1',
   'port'     => 3306,
   'makara'   => {
     'connections' => [
