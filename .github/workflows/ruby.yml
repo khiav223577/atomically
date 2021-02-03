@@ -59,6 +59,29 @@ jobs:
       BUNDLE_GEMFILE: "gemfiles/${{ matrix.gemfile }}"
       DB: "${{ matrix.db }}"
 
+    services:
+      mysql:
+        if: matrix.db == 'mysql' || matrix.db == 'makara_mysql'
+        image: mysql:5.7
+        env:
+          MYSQL_USER: developer
+          MYSQL_PASSWORD: developer_password
+          MYSQL_DATABASE: github_actions_test
+        ports:
+          - 3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      postgres:
+        if: matrix.db == 'pg' || matrix.db == 'makara_pg'
+        image: postgres:9.6
+        env:
+          POSTGRES_USER: developer
+          POSTGRES_PASSWORD: developer_password
+          POSTGRES_DB: github_actions_test
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -67,25 +90,6 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-    - name: Shutdown Ubuntu MySQL (SUDO)
-      if: matrix.db == 'mysql' || matrix.db == 'makara_mysql'
-      run: sudo service mysql stop # Shutdown the Default MySQL, "sudo" is necessary, please not remove it
-    - name: Setup MySQL
-      if: matrix.db == 'mysql' || matrix.db == 'makara_mysql'
-      uses: mirromutth/mysql-action@v1.1
-      with:
-        mysql version: '5.6'
-        mysql database: 'github_actions_test'
-        mysql user: 'developer'
-        mysql password: 'developer_password'
-    - name: Setup PostgreSQL
-      if: matrix.db == 'pg' || matrix.db == 'makara_pg'
-      uses: harmon758/postgresql-action@v1
-      with:
-        postgresql version: '9.6'
-        postgresql db: 'github_actions_test'
-        postgresql user: 'developer'
-        postgresql password: 'developer_password'
     - name: Run tests
       run: bundle exec rake
     - name: Publish code coverage
