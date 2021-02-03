@@ -72,11 +72,15 @@ jobs:
       uses: mirromutth/mysql-action@v1.1
       with:
         mysql database: 'github_actions_test'
+        mysql user: 'developer'
+        mysql password: 'developer_password'
     - name: Setup PostgreSQL
       if: matrix.db == 'pg' || matrix.db == 'makara_pg'
       uses: harmon758/postgresql-action@v1
       with:
         postgresql db: 'github_actions_test'
+        postgresql user: 'developer'
+        postgresql password: 'developer_password'
     - name: Run tests
       run: bundle exec rake
     - name: Publish code coverage
