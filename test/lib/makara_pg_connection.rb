@@ -7,6 +7,7 @@ ActiveRecord::Base.establish_connection(
   'database' => 'github_actions_test',
   'username' => 'developer',
   'password' => 'developer_password',
+  'port'     => 5432,
   'makara'   => {
     'connections' => [
       { 'role' => 'master' },
