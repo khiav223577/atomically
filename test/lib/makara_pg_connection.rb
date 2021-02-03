@@ -4,10 +4,10 @@ require 'makara'
 
 ActiveRecord::Base.establish_connection(
   'adapter'  => 'postgresql_makara',
-  'host'     => 'postgres',
   'database' => 'github_actions_test',
   'username' => 'developer',
   'password' => 'developer_password',
+  'host'     => 'localhost',
   'port'     => 5432,
   'makara'   => {
     'connections' => [
