@@ -27,6 +27,7 @@ jobs:
           # See: https://github.community/t/mysql2-segmentation-fault-at-0x0000000000000000/159283
           - 2.6
           - 2.7
+          - 3.0
         gemfile:
           - 3.2.gemfile
           - 4.2.gemfile
@@ -38,9 +39,19 @@ jobs:
           - gemfile: 3.2.gemfile
             ruby: 2.6
           - gemfile: 3.2.gemfile
+            ruby: 3.0
+          - gemfile: 3.2.gemfile
             ruby: 2.7
           - gemfile: 4.2.gemfile
             ruby: 2.7
+          - gemfile: 4.2.gemfile
+            ruby: 3.0
+          - gemfile: 5.0.gemfile
+            ruby: 3.0
+          - gemfile: 5.1.gemfile
+            ruby: 3.0
+          - gemfile: 5.2.gemfile
+            ruby: 3.0
           - gemfile: 6.0.gemfile
             ruby: 2.2
         include:
