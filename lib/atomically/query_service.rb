@@ -51,7 +51,8 @@ class Atomically::QueryService
     where_all_can_be_updated(@relation, expected_size).update_all(*args)
   end
 
-  def update(attrs, from: :not_set)
+  def update(attrs, options = {})
+    from = options[:from] || :not_set
     success = update_and_return_number_of_updated_rows(attrs, from) == 1
 
     if success
