@@ -4,7 +4,7 @@ gem 'activerecord', '~> 6.0.0'
 
 group :test do
   gem 'mysql2', '0.5.1' if %w[mysql makara_mysql].include?(ENV['DB'])
-  gem 'pg', '~> 0.18' if %w[pg makara_pg].include?(ENV['DB'])
+  gem 'pg', '~> 1.1.4' if %w[pg makara_pg].include?(ENV['DB'])
   gem 'makara', '~> 0.4.1' if %w[makara_mysql makara_pg].include?(ENV['DB'])
   gem 'simplecov', '< 0.18'
   gem 'pluck_all', '>= 2.0.4'
