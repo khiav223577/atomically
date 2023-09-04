@@ -65,4 +65,15 @@ class UpdateAllAndGetIdsTest < Minitest::Test
       assert_equal ['bomb', '', 'flame thrower'], Item.order('id').pluck(:name)
     end
   end
+
+  def test_select_from_dual
+    skip if not Atomically::AdapterCheckService.new(UserItem).mysql?
+
+    in_sandbox do
+      assert_sqls(['SELECT @ids FROM DUAL']) do
+        assert_equal [1, 2], Item.joins(:users).atomically.update_all_and_get_ids('items.name = ""')
+        assert_equal ['', '', 'flame thrower'], Item.order('id').pluck(:name)
+      end
+    end
+  end
 end
