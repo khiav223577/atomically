@@ -1,5 +1,9 @@
 ## Change Log
 
+### [v1.1.4](https://github.com/khiav223577/atomically/compare/v1.1.3...v1.1.4) 2023/09/04
+- [#23](https://github.com/khiav223577/atomically/pull/23) Fix - `from(nil)` did not generate the expected SQL (@ff2248)
+- [#24](https://github.com/khiav223577/atomically/pull/24) Skip the step of publishing code coverage for the PR from forked repos (@khiav223577)
+
 ### [v1.1.3](https://github.com/khiav223577/atomically/compare/v1.1.2...v1.1.3) 2023/08/19
 - [#22](https://github.com/khiav223577/atomically/pull/22) Support Ruby 3.0 (@khiav223577)
 - [#21](https://github.com/khiav223577/atomically/pull/21) Migrating from Travis CI to GitHub Actions (@khiav223577)
