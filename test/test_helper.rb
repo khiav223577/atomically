@@ -51,3 +51,21 @@ def assert_queries(expected_count, event_key = 'sql.active_record')
 ensure
   ActiveSupport::Notifications.unsubscribe(subscriber)
 end
+
+def assert_sqls(expected_sqls, event_key = 'sql.active_record')
+  sqls = []
+  subscriber = ActiveSupport::Notifications.subscribe(event_key) do |_, _, _, _, payload|
+    next if payload[:sql].start_with?('PRAGMA table_info')
+    next if payload[:sql] =~ /\A(?:BEGIN TRANSACTION|COMMIT TRANSACTION|BEGIN|COMMIT)\z/i
+
+    sqls << payload[:sql]
+  end
+  yield
+
+  missing_sqls = expected_sqls - sqls
+  if missing_sqls.any?
+    assert_equal "expect #{expected_sqls} queried, but query following sqls:\n#{sqls.join("\n").tr('"', "'")}\n", "\nmissing sqls:\n#{missing_sqls.join("\n").tr('"', "'")}\n"
+  end
+ensure
+  ActiveSupport::Notifications.unsubscribe(subscriber)
+end
