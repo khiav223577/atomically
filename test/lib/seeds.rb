@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require 'rails_compatibility/setup_autoload_paths'
+RailsCompatibility.setup_autoload_paths [File.expand_path('../models/', __FILE__)]
+
 ActiveRecord::Schema.define do
   self.verbose = false
 
@@ -26,8 +29,6 @@ ActiveRecord::Schema.define do
     t.timestamps null: false
   end
 end
-
-ActiveSupport::Dependencies.autoload_paths << File.expand_path('../models/', __FILE__)
 
 users = User.create([
   { name: 'user_with_bomb_and_water_gun', money: 100, action_point: 3 },

@@ -10,6 +10,7 @@ group :test do
   gem 'pluck_all', '>= 2.0.4'
   gem 'timecop', '~> 0.9.1'
   gem 'update_all_scope', '~> 0.1.0'
+  gem 'rails_compatibility', '>= 0.0.8'
 end
 
 gemspec path: '../'
