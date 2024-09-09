@@ -1,5 +1,9 @@
 ## Change Log
 
+### [v1.1.5](https://github.com/khiav223577/atomically/compare/v1.1.4...v1.1.5) 2024/09/09
+- [#26](https://github.com/khiav223577/atomically/pull/26) Support Ruby 3.2 and Rails 7.2 (@khiav223577)
+- [#25](https://github.com/khiav223577/atomically/pull/25) Fix: Use explicit expression in where condition (@glasses618)
+
 ### [v1.1.4](https://github.com/khiav223577/atomically/compare/v1.1.3...v1.1.4) 2023/09/04
 - [#23](https://github.com/khiav223577/atomically/pull/23) Fix - `from(nil)` did not generate the expected SQL (@ff2248)
 - [#24](https://github.com/khiav223577/atomically/pull/24) Skip the step of publishing code coverage for the PR from forked repos (@khiav223577)
