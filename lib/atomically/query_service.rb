@@ -87,7 +87,7 @@ class Atomically::QueryService
     id_column = quote_column_with_table(:id)
     @klass.transaction do
       @relation.connection.execute('SET @ids := NULL')
-      @relation.where("(SELECT @ids := CONCAT_WS(',', #{id_column}, @ids))").update_all(*args) # 撈出有真的被更新的 id，用逗號串在一起
+      @relation.where("((@ids := CONCAT_WS(',', #{id_column}, @ids)) IS NOT NULL)").update_all(*args) # 撈出有真的被更新的 id，用逗號串在一起
       ids = @klass.from(Arel.sql('DUAL')).pluck(Arel.sql('@ids')).first
     end
     return ids.try{|s| s.split(',').map(&:to_i).uniq.sort } || [] # 將 id 從字串取出來 @id 的格式範例: '1,4,12'
