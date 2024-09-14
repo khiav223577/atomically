@@ -7,7 +7,7 @@ Gem::Specification.new do |spec|
   spec.name          = 'atomically'
   spec.version       = Atomically::VERSION
   spec.authors       = ['khiav reoy']
-  spec.email         = ['mrtmrt15xn@yahoo.com.tw']
+  spec.email         = ['khiav223577@gmail.com']
 
   spec.summary       = 'An ActiveRecord extension for writing commonly useful atomic SQL statements to avoid race condition.'
   spec.description   = 'An ActiveRecord extension for writing commonly useful atomic SQL statements to avoid race condition.'
